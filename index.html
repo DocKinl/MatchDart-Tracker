@@ -1336,6 +1336,142 @@
     font-size: 0.7rem;
     color: var(--accent);
   }
+
+  /* ── DART CONFIRMATION MODAL ── */
+  .confirm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,15,20,0.9);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .confirm-modal-overlay.show { opacity: 1; pointer-events: all; }
+  .confirm-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 1.25rem 1.25rem 1.5rem;
+    width: 100%;
+    max-width: 480px;
+  }
+  .confirm-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+  .confirm-throws-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .confirm-dart-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.4rem;
+    text-align: center;
+  }
+  .confirm-dart-box .cdb-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+  .confirm-dart-box .cdb-val {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--text);
+    line-height: 1;
+  }
+  .confirm-dart-box .cdb-pts {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.1rem;
+  }
+  .confirm-sum-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.9rem;
+    margin-bottom: 1rem;
+  }
+  .confirm-sum-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .confirm-sum-val { font-family: var(--font-display); font-size: 1.8rem; color: var(--accent); letter-spacing: 0.04em; }
+  .confirm-sum-rest { font-family: var(--font-display); font-size: 1.1rem; color: var(--muted); letter-spacing: 0.04em; }
+  .confirm-btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .confirm-btn {
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: 0.06em;
+    padding: 0.85rem 0.5rem;
+    text-align: center;
+    transition: all 0.15s;
+    border: 1.5px solid;
+  }
+  .confirm-btn:active { transform: scale(0.96); }
+  .confirm-btn-yes {
+    background: rgba(74,232,132,0.12);
+    border-color: rgba(74,232,132,0.4);
+    color: var(--success);
+  }
+  .confirm-btn-fix {
+    background: rgba(232,200,74,0.08);
+    border-color: rgba(232,200,74,0.3);
+    color: var(--accent);
+  }
+  /* Speech listening indicator inside modal */
+  .confirm-listening {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Correction sub-modal */
+  .correct-dart-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .correct-dart-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    padding: 0.7rem 0.4rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .correct-dart-btn:active {
+    background: rgba(232,200,74,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -1801,6 +1937,93 @@
   </div>
 </div>
 
+<!-- DART CONFIRMATION MODAL -->
+<div class="confirm-modal-overlay" id="confirm-modal">
+  <div class="confirm-card">
+    <div class="confirm-title" id="confirm-title">Würfe bestätigen</div>
+
+    <!-- Dart mode: 3 boxes -->
+    <div class="confirm-throws-row" id="confirm-throws-row">
+      <div class="confirm-dart-box">
+        <div class="cdb-label">Dart 1</div>
+        <div class="cdb-val" id="cdb-val-1">—</div>
+        <div class="cdb-pts" id="cdb-pts-1"></div>
+      </div>
+      <div class="confirm-dart-box">
+        <div class="cdb-label">Dart 2</div>
+        <div class="cdb-val" id="cdb-val-2">—</div>
+        <div class="cdb-pts" id="cdb-pts-2"></div>
+      </div>
+      <div class="confirm-dart-box">
+        <div class="cdb-label">Dart 3</div>
+        <div class="cdb-val" id="cdb-val-3">—</div>
+        <div class="cdb-pts" id="cdb-pts-3"></div>
+      </div>
+    </div>
+
+    <!-- Sum mode: one row -->
+    <div class="confirm-sum-row" id="confirm-sum-row" style="display:none">
+      <div>
+        <div class="confirm-sum-label">Punkte</div>
+        <div class="confirm-sum-val" id="confirm-sum-val">—</div>
+      </div>
+      <div style="text-align:right">
+        <div class="confirm-sum-label">Rest</div>
+        <div class="confirm-sum-rest" id="confirm-sum-rest">—</div>
+      </div>
+    </div>
+
+    <!-- Listening hint (only when mic active) -->
+    <div class="confirm-listening" id="confirm-listening" style="display:none">
+      <div class="speech-dot" id="confirm-dot"></div>
+      <span id="confirm-listen-txt">Sage „Ja" oder „Korrigieren"</span>
+    </div>
+
+    <!-- Main buttons -->
+    <div class="confirm-btn-row" id="confirm-main-btns">
+      <button class="confirm-btn confirm-btn-yes" onclick="confirmYes()">JA ✓</button>
+      <button class="confirm-btn confirm-btn-fix" onclick="confirmFix()">KORRIGIEREN</button>
+    </div>
+
+    <!-- Correction: which dart? (dart mode) -->
+    <div id="confirm-fix-dart" style="display:none">
+      <div class="confirm-title" style="margin-bottom:0.5rem">Welcher Dart war falsch?</div>
+      <div class="correct-dart-row">
+        <button class="correct-dart-btn" onclick="fixDart(1)">Dart 1</button>
+        <button class="correct-dart-btn" onclick="fixDart(2)">Dart 2</button>
+        <button class="correct-dart-btn" onclick="fixDart(3)">Dart 3</button>
+      </div>
+      <button class="confirm-btn" style="width:100%;border-color:var(--border);color:var(--muted);background:var(--surface2)" onclick="confirmFixBack()">← Zurück</button>
+    </div>
+
+    <!-- Correction: new sum (sum mode) -->
+    <div id="confirm-fix-sum" style="display:none">
+      <div class="confirm-title" style="margin-bottom:0.5rem">Korrekte Punktzahl eingeben</div>
+      <div style="display:flex;gap:0.4rem;margin-bottom:0.5rem">
+        <div style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.5rem 0.75rem;font-family:var(--font-display);font-size:1.8rem;color:var(--text);min-width:0" id="fix-sum-display">—</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.3rem;width:160px">
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(1)">1</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(2)">2</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(3)">3</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(4)">4</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(5)">5</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(6)">6</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(7)">7</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(8)">8</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(9)">9</button>
+          <button class="digit-btn clear" style="font-size:0.85rem" onclick="fixSumClear()">C</button>
+          <button class="digit-btn" style="font-size:1.2rem" onclick="fixSumDigit(0)">0</button>
+          <button class="digit-btn del" style="font-size:1rem" onclick="fixSumDel()">⌫</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem">
+        <button class="confirm-btn confirm-btn-yes" onclick="fixSumCommit()">✓ OK</button>
+        <button class="confirm-btn" style="border-color:var(--border);color:var(--muted);background:var(--surface2)" onclick="confirmFixBack()">← Zurück</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- QUIT MODAL -->
 <div class="modal-overlay" id="quit-modal">
   <div class="modal-card">
@@ -2124,8 +2347,24 @@ function processThrow(scored, field, mod) {
     updateDarts();
     updateStats();
     showBust();
-    // Always end round immediately on bust (even with darts remaining)
-    setTimeout(() => endRound(true), 850);
+    if (micActive) {
+      const remainBefore = gs.remaining + gs.throwsThisRound.reduce((s,t) => s + (t.busted?0:t.scored), 0) + scored;
+      setTimeout(() => {
+        showConfirmModal({
+          mode: 'dart',
+          throws: [...gs.throwsThisRound],
+          actualScore: 0,
+          newRemaining: gs.remaining,
+          remainingBefore: remainBefore,
+          won: false,
+          busted: true,
+        });
+        gs.dartInRound = 0;
+        gs.throwsThisRound = [];
+      }, 850);
+    } else {
+      setTimeout(() => endRound(true), 850);
+    }
     return;
   }
 
@@ -2147,7 +2386,25 @@ function processThrow(scored, field, mod) {
 
   // Auto-advance round after 3 darts
   if (gs.dartInRound >= 3) {
-    endRound(false);
+    if (micActive) {
+      // Show confirmation modal instead of immediately committing
+      const remainBefore = gs.remaining + gs.throwsThisRound.reduce((s,t) => s + (t.busted?0:t.scored), 0);
+      // Restore remaining to before this round for the modal
+      showConfirmModal({
+        mode: 'dart',
+        throws: [...gs.throwsThisRound],
+        actualScore: gs.throwsThisRound.reduce((s,t) => s + (t.busted?0:t.scored), 0),
+        newRemaining: gs.remaining,
+        remainingBefore: remainBefore,
+        won: false,
+        busted: false,
+      });
+      // Reset dart state for potential re-entry
+      gs.dartInRound = 0;
+      gs.throwsThisRound = [];
+    } else {
+      endRound(false);
+    }
   }
 }
 
@@ -2458,14 +2715,28 @@ function announceWin(winner = 'human') {
 // ════════════════════════════════════════════
 //  SPEECH
 // ════════════════════════════════════════════
-function speak(text) {
-  if (!settings.speech || !window.speechSynthesis) return;
+function speak(text, onDone) {
+  if (!settings.speech || !window.speechSynthesis) { if (onDone) onDone(); return; }
+  // Chrome bug workaround: resume if paused/stuck
+  if (window.speechSynthesis.paused) window.speechSynthesis.resume();
   window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'de-DE';
-  utter.volume = settings.volume;
-  utter.rate = 1.05;
-  window.speechSynthesis.speak(utter);
+  // Small delay after cancel to avoid Chrome swallowing the next utterance
+  setTimeout(() => {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'de-DE';
+    utter.volume = settings.volume;
+    utter.rate = 1.0;
+    if (onDone) utter.onend = onDone;
+    // Chrome fix: keep synthesis alive with a periodic resume
+    const keepAlive = setInterval(() => {
+      if (!window.speechSynthesis.speaking) { clearInterval(keepAlive); return; }
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }, 10000);
+    utter.onend = () => { clearInterval(keepAlive); if (onDone) onDone(); };
+    utter.onerror = () => { clearInterval(keepAlive); if (onDone) onDone(); };
+    window.speechSynthesis.speak(utter);
+  }, 80);
 }
 
 function speakRound(scored, remaining) {
@@ -2621,10 +2892,22 @@ function sumProcessRound(scored, newRemaining) {
   }
 
   // Normal round
+  sumClear();
+  if (micActive) {
+    showConfirmModal({
+      mode: 'sum',
+      throws: [],
+      actualScore: scored,
+      newRemaining,
+      remainingBefore: gs.remaining,
+      won: false,
+      busted: false,
+    });
+    return;
+  }
   gs.remaining = newRemaining;
   gs.totalDarts += 3;
   gs.throwsThisRound = [{ scored, field: scored, mod: 'sum', busted: false }];
-  sumClear();
   updateScoreDisplay(true);
   updateStats();
   endRoundSum(false, scored, 3);
@@ -2809,6 +3092,12 @@ function toggleMic() {
 
 // ── SPEECH PARSER ──
 function processSpeechInput(text) {
+  // If confirmation modal is open, route there first
+  const modal = document.getElementById('confirm-modal');
+  if (modal && modal.classList.contains('show')) {
+    handleConfirmSpeech(text);
+    return;
+  }
   if (gameState.inputMode === 'sum') {
     parseSumSpeech(text);
   } else {
@@ -2969,6 +3258,271 @@ function parseSumSpeech(text) {
   }
 
   document.getElementById('speech-transcript').textContent = '❓ Nicht erkannt: ' + text;
+}
+
+// ════════════════════════════════════════════
+//  DART CONFIRMATION LOGIC
+// ════════════════════════════════════════════
+
+// Pending confirmation state
+let pendingConfirm = null;
+// { mode: 'dart'|'sum', throws: [...], actualScore, newRemaining, won, busted, dartCount }
+
+let fixSumStr = '';
+
+function showConfirmModal(data) {
+  pendingConfirm = data;
+  const modal = document.getElementById('confirm-modal');
+  const isSum = data.mode === 'sum';
+
+  // Show/hide sections
+  document.getElementById('confirm-throws-row').style.display = isSum ? 'none' : 'grid';
+  document.getElementById('confirm-sum-row').style.display = isSum ? 'flex' : 'none';
+  document.getElementById('confirm-main-btns').style.display = 'grid';
+  document.getElementById('confirm-fix-dart').style.display = 'none';
+  document.getElementById('confirm-fix-sum').style.display = 'none';
+
+  if (!isSum) {
+    // Fill dart boxes
+    data.throws.forEach((t, i) => {
+      const idx = i + 1;
+      const label = t.mod === 'triple' ? 'T' + t.field
+                  : t.mod === 'double' ? 'D' + t.field
+                  : t.field === 'Bull' ? (t.scored === 50 ? 'BULL' : 'Bull')
+                  : t.scored === 0 ? 'MISS'
+                  : String(t.field);
+      document.getElementById('cdb-val-' + idx).textContent = label;
+      document.getElementById('cdb-pts-' + idx).textContent = t.scored > 0 ? t.scored + ' Pkt' : '';
+      // Fill empty slots
+      if (idx > data.throws.length) {
+        document.getElementById('cdb-val-' + idx).textContent = '—';
+        document.getElementById('cdb-pts-' + idx).textContent = '';
+      }
+    });
+    // Clear unused slots
+    for (let i = data.throws.length + 1; i <= 3; i++) {
+      document.getElementById('cdb-val-' + i).textContent = '—';
+      document.getElementById('cdb-pts-' + i).textContent = '';
+    }
+    document.getElementById('confirm-title').textContent =
+      'Punkte: ' + data.actualScore + '  –  Rest: ' + data.newRemaining;
+  } else {
+    document.getElementById('confirm-sum-val').textContent = data.actualScore;
+    document.getElementById('confirm-sum-rest').textContent = data.newRemaining;
+    document.getElementById('confirm-title').textContent = 'Wurf bestätigen';
+  }
+
+  // Mic listening hint
+  const hint = document.getElementById('confirm-listening');
+  if (micActive) {
+    hint.style.display = 'flex';
+    document.getElementById('confirm-listen-txt').textContent = 'Sage „Ja" oder „Korrigieren"';
+  } else {
+    hint.style.display = 'none';
+  }
+
+  modal.classList.add('show');
+
+  // Announce the score
+  if (!isSum) {
+    const throwText = data.throws.map(t => {
+      if (t.scored === 0) return 'Miss';
+      if (t.field === 'Bull') return t.scored === 50 ? 'Double Bull' : 'Single Bull';
+      if (t.mod === 'triple') return 'Triple ' + t.field;
+      if (t.mod === 'double') return 'Double ' + t.field;
+      return String(t.field);
+    }).join(', ');
+    speak(throwText + '. Gesamt ' + data.actualScore + '. Rest ' + data.newRemaining + '. Bestätigen?');
+  } else {
+    speak(data.actualScore + ' Punkte. Rest ' + data.newRemaining + '. Bestätigen?');
+  }
+}
+
+function confirmYes() {
+  document.getElementById('confirm-modal').classList.remove('show');
+  if (!pendingConfirm) return;
+  const d = pendingConfirm;
+  pendingConfirm = null;
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  if (d.mode === 'dart') {
+    applyDartRound(d);
+  } else {
+    applySumRound(d);
+  }
+}
+
+function confirmFix() {
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  const isSum = pendingConfirm && pendingConfirm.mode === 'sum';
+  document.getElementById('confirm-main-btns').style.display = 'none';
+  if (isSum) {
+    fixSumStr = '';
+    updateFixSumDisplay();
+    document.getElementById('confirm-fix-sum').style.display = 'block';
+    document.getElementById('confirm-listening').style.display = 'none';
+    if (micActive) {
+      document.getElementById('confirm-listening').style.display = 'flex';
+      document.getElementById('confirm-listen-txt').textContent = 'Sage die korrekte Punktzahl';
+    }
+  } else {
+    document.getElementById('confirm-fix-dart').style.display = 'block';
+    if (micActive) {
+      document.getElementById('confirm-listening').style.display = 'flex';
+      document.getElementById('confirm-listen-txt').textContent = 'Sage „Dart 1", „Dart 2" oder „Dart 3"';
+    }
+  }
+}
+
+function confirmFixBack() {
+  document.getElementById('confirm-fix-dart').style.display = 'none';
+  document.getElementById('confirm-fix-sum').style.display = 'none';
+  document.getElementById('confirm-main-btns').style.display = 'grid';
+  if (micActive) {
+    document.getElementById('confirm-listening').style.display = 'flex';
+    document.getElementById('confirm-listen-txt').textContent = 'Sage „Ja" oder „Korrigieren"';
+  }
+}
+
+function fixDart(idx) {
+  // Remove dart at idx-1 from pending throws, close modal, re-enter that dart
+  document.getElementById('confirm-modal').classList.remove('show');
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  if (!pendingConfirm) return;
+  const d = pendingConfirm;
+  pendingConfirm = null;
+  // Restore game state: remove throws from idx onwards
+  gameState.dartInRound = idx - 1;
+  // Restore remaining to before those darts
+  let restoredRemaining = d.remainingBefore;
+  for (let i = 0; i < idx - 1; i++) {
+    restoredRemaining -= d.throws[i].scored;
+  }
+  gameState.remaining = restoredRemaining;
+  gameState.throwsThisRound = d.throws.slice(0, idx - 1);
+  updateScoreDisplay();
+  updateDarts();
+  speak('Dart ' + idx + ' neu eingeben.');
+}
+
+// ── Fix sum mode ──
+function updateFixSumDisplay() {
+  const el = document.getElementById('fix-sum-display');
+  if (!fixSumStr) { el.textContent = '—'; el.style.color = 'var(--muted)'; return; }
+  const n = parseInt(fixSumStr);
+  const valid = isValidScore(n) && n <= (pendingConfirm ? pendingConfirm.remainingBefore : 180);
+  el.textContent = fixSumStr;
+  el.style.color = valid ? 'var(--text)' : 'var(--danger)';
+}
+function fixSumDigit(d) { if (fixSumStr.length < 3) { fixSumStr += d; updateFixSumDisplay(); } }
+function fixSumDel() { fixSumStr = fixSumStr.slice(0,-1); updateFixSumDisplay(); }
+function fixSumClear() { fixSumStr = ''; updateFixSumDisplay(); }
+
+function fixSumCommit() {
+  if (!fixSumStr) return;
+  const n = parseInt(fixSumStr);
+  if (!pendingConfirm) return;
+  const before = pendingConfirm.remainingBefore;
+  if (!isValidScore(n) || n > before) {
+    document.getElementById('fix-sum-display').style.color = 'var(--danger)';
+    return;
+  }
+  const newRem = before - n;
+  pendingConfirm.actualScore = n;
+  pendingConfirm.newRemaining = newRem;
+  fixSumStr = '';
+  // Show updated confirmation
+  document.getElementById('confirm-fix-sum').style.display = 'none';
+  document.getElementById('confirm-main-btns').style.display = 'grid';
+  document.getElementById('confirm-sum-val').textContent = n;
+  document.getElementById('confirm-sum-rest').textContent = newRem;
+  document.getElementById('confirm-title').textContent = 'Wurf bestätigen';
+  if (micActive) {
+    document.getElementById('confirm-listening').style.display = 'flex';
+    document.getElementById('confirm-listen-txt').textContent = 'Sage „Ja" oder „Korrigieren"';
+  }
+  speak(n + ' Punkte. Rest ' + newRem + '. Bestätigen?');
+}
+
+// ── Apply confirmed rounds ──
+function applyDartRound(d) {
+  const gs = gameState;
+  gs.remaining = d.newRemaining;
+  gs.throwsThisRound = d.throws;
+  gs.dartInRound = d.throws.length;
+  gs.totalDarts += d.throws.length;
+  if (d.actualScore > gs.highestRound) gs.highestRound = d.actualScore;
+  updateScoreDisplay(true);
+  updateDarts();
+  updateStats();
+  if (d.won) {
+    const winner = (gameConfig.playerMode !== 'solo' && gs.currentTurn === 'opponent') ? 'opponent' : 'human';
+    speak('Gewonnen!', () => showWin(winner));
+    return;
+  }
+  speak(d.actualScore + ' Punkte. Rest ' + d.newRemaining, () => {
+    endRound(d.busted, d.won);
+  });
+}
+
+function applySumRound(d) {
+  const gs = gameState;
+  gs.remaining = d.newRemaining;
+  updateScoreDisplay(true);
+  updateStats();
+  if (d.won) {
+    // Show checkout dart modal
+    gs.sumPendingScore = { scored: d.actualScore, newRemaining: 0 };
+    showCheckoutModal();
+    return;
+  }
+  if (d.busted) {
+    showBust();
+    setTimeout(() => showBustDartModal(d.actualScore), 850);
+    return;
+  }
+  gs.totalDarts += 3;
+  gs.throwsThisRound = [{ scored: d.actualScore, field: d.actualScore, mod: 'sum', busted: false }];
+  endRoundSum(false, d.actualScore, 3);
+}
+
+// ── Speech input for confirmation modal ──
+function handleConfirmSpeech(text) {
+  const t = text.toLowerCase().trim();
+  const fixDartVisible = document.getElementById('confirm-fix-dart').style.display !== 'none';
+  const fixSumVisible = document.getElementById('confirm-fix-sum').style.display !== 'none';
+
+  if (fixDartVisible) {
+    // Expect "Dart 1/2/3" or "erster/zweiter/dritter" or "1/2/3"
+    if (/dart\s*1|erst|one|1/.test(t)) { fixDart(1); return true; }
+    if (/dart\s*2|zweit|two|2/.test(t)) { fixDart(2); return true; }
+    if (/dart\s*3|dritt|three|3/.test(t)) { fixDart(3); return true; }
+    if (/zurück|back|nein/.test(t)) { confirmFixBack(); return true; }
+    return false;
+  }
+
+  if (fixSumVisible) {
+    // Try to parse a number
+    const numMatch = t.match(/\d+/);
+    if (numMatch) {
+      fixSumStr = numMatch[0];
+      updateFixSumDisplay();
+      fixSumCommit();
+      return true;
+    }
+    const spoken = parseSpokenNumber(t.replace(/punkte?|rest|übrig/g,'').trim());
+    if (spoken !== null) {
+      fixSumStr = String(spoken);
+      updateFixSumDisplay();
+      fixSumCommit();
+      return true;
+    }
+    return false;
+  }
+
+  // Main confirm view
+  if (/^(ja|yes|jo|genau|stimmt|richtig|okay|ok|bestätigen?)/.test(t)) { confirmYes(); return true; }
+  if (/korrigier|falsch|nein|no|änder|fix/.test(t)) { confirmFix(); return true; }
+  return false;
 }
 
 // ════════════════════════════════════════════
