@@ -2408,7 +2408,7 @@ function processThrow(scored, field, mod) {
   }
 }
 
-function endRound(busted, won = false) {
+function endRound(busted, won = false, skipSpeak = false) {
   const gs = gameState;
   const throws = gs.throwsThisRound;
   const roundScore = throws.reduce((s, t) => s + (busted ? 0 : t.busted ? 0 : t.scored), 0);
@@ -2445,12 +2445,10 @@ function endRound(busted, won = false) {
     return;
   }
 
-  // Speech after round
-  if (settings.speech && !busted) {
-    const remaining = gs.remaining;
-    speakRound(actualScore, remaining);
-  } else if (settings.speech && busted) {
-    speak('Bust!');
+  // Speech after round (skip if confirmation modal already announced)
+  if (!skipSpeak) {
+    if (settings.speech && !busted) speakRound(actualScore, gs.remaining);
+    else if (settings.speech && busted) speak('Bust!');
   }
 
   // Multiplayer: switch turns
@@ -2946,7 +2944,7 @@ function confirmBustDart(dartNum) {
   endRoundSum(true, 0, dartNum);
 }
 
-function endRoundSum(busted, actualScore, dartCount, won = false) {
+function endRoundSum(busted, actualScore, dartCount, won = false, skipSpeak = false) {
   const gs = gameState;
 
   if (actualScore > gs.highestRound && !busted) gs.highestRound = actualScore;
@@ -2968,8 +2966,10 @@ function endRoundSum(busted, actualScore, dartCount, won = false) {
     return;
   }
 
-  if (settings.speech && !busted) speakRound(actualScore, gs.remaining);
-  else if (settings.speech && busted) speak('Bust!');
+  if (!skipSpeak) {
+    if (settings.speech && !busted) speakRound(actualScore, gs.remaining);
+    else if (settings.speech && busted) speak('Bust!');
+  }
 
   // Multiplayer
   if (gameConfig.playerMode !== 'solo') {
@@ -3150,24 +3150,19 @@ function parseDartToken(token) {
 }
 
 function parseDartSpeech(text) {
-  // Normalize: replace commas/und with space
-  text = text.replace(/[,;]/g,' ').replace(/und/g,' ');
+  text = text.replace(/[,;]/g,' ').replace(/\bund\b/g,' ').toLowerCase().trim();
 
-  // Try to parse up to 3 dart tokens separated by spaces
-  const tokens = text.trim().split(/\s+/);
-  const darts = [];
+  // Always try multi-word first — handles 'triple 20', 'dreifach zwanzig' etc.
+  let darts = parseMultiWordDarts(text);
 
-  for (const tok of tokens) {
-    const d = parseDartToken(tok);
-    if (d) darts.push(d);
-    if (darts.length === 3) break;
-  }
-
-  // Also try parsing spoken number combos: "triple zwanzig double sechzehn fünf"
+  // Fallback: token-by-token for compact forms like 't20 d16 5'
   if (darts.length === 0) {
-    // Try multi-word patterns
-    const multiMatch = parseMultiWordDarts(text);
-    if (multiMatch.length > 0) darts.push(...multiMatch);
+    const tokens = text.trim().split(/\s+/);
+    for (const tok of tokens) {
+      const d = parseDartToken(tok);
+      if (d) darts.push(d);
+      if (darts.length === 3) break;
+    }
   }
 
   if (darts.length === 0) {
@@ -3175,19 +3170,20 @@ function parseDartSpeech(text) {
     return;
   }
 
+  darts = darts.slice(0, 3);
+
   // Apply darts one by one
   for (const d of darts) {
     if (gameState.dartInRound >= 3) break;
     processThrow(d.scored, d.field, d.mod);
-    // small spoken feedback
-    if (settings.speech) {
-      const lbl = d.mod === 'triple' ? 'Triple ' + d.field
-                : d.mod === 'double' ? 'Double ' + d.field
-                : d.scored === 0 ? 'Miss'
+    // Speak single-dart feedback (3-dart confirmation modal handles full round)
+    if (settings.speech && darts.length < 3) {
+      const lbl = d.mod === 'triple' ? 'Dreifach ' + d.field
+                : d.mod === 'double' ? 'Doppel ' + d.field
+                : d.scored === 0 ? 'daneben'
                 : d.field === 'Bull' ? 'Bull'
-                : d.field.toString();
-      // Only speak single dart if fewer than 3 given
-      if (darts.length < 3) speak(lbl + ', ' + gameState.remaining + ' Rest');
+                : String(d.field);
+      speak(lbl + ', Rest ' + gameState.remaining);
     }
   }
 }
@@ -3323,18 +3319,18 @@ function showConfirmModal(data) {
 
   modal.classList.add('show');
 
-  // Announce the score
+  // Announce the score (commas = natural pause, no dots before numbers to avoid ordinal TTS)
   if (!isSum) {
     const throwText = data.throws.map(t => {
-      if (t.scored === 0) return 'Miss';
-      if (t.field === 'Bull') return t.scored === 50 ? 'Double Bull' : 'Single Bull';
-      if (t.mod === 'triple') return 'Triple ' + t.field;
-      if (t.mod === 'double') return 'Double ' + t.field;
+      if (t.scored === 0) return 'daneben';
+      if (t.field === 'Bull') return t.scored === 50 ? 'Double Bull' : 'Bull fünfundzwanzig';
+      if (t.mod === 'triple') return 'Dreifach ' + t.field;
+      if (t.mod === 'double') return 'Doppel ' + t.field;
       return String(t.field);
     }).join(', ');
-    speak(throwText + '. Gesamt ' + data.actualScore + '. Rest ' + data.newRemaining + '. Bestätigen?');
+    speak(throwText + ', gesamt ' + data.actualScore + ', Rest ' + data.newRemaining + ', bestätigen');
   } else {
-    speak(data.actualScore + ' Punkte. Rest ' + data.newRemaining + '. Bestätigen?');
+    speak(data.actualScore + ' Punkte, Rest ' + data.newRemaining + ', bestätigen');
   }
 }
 
@@ -3456,12 +3452,11 @@ function applyDartRound(d) {
   updateStats();
   if (d.won) {
     const winner = (gameConfig.playerMode !== 'solo' && gs.currentTurn === 'opponent') ? 'opponent' : 'human';
-    speak('Gewonnen!', () => showWin(winner));
+    announceWin(winner);
+    setTimeout(() => showWin(winner), 800);
     return;
   }
-  speak(d.actualScore + ' Punkte. Rest ' + d.newRemaining, () => {
-    endRound(d.busted, d.won);
-  });
+  endRound(d.busted, d.won, true);
 }
 
 function applySumRound(d) {
@@ -3482,7 +3477,7 @@ function applySumRound(d) {
   }
   gs.totalDarts += 3;
   gs.throwsThisRound = [{ scored: d.actualScore, field: d.actualScore, mod: 'sum', busted: false }];
-  endRoundSum(false, d.actualScore, 3);
+  endRoundSum(false, d.actualScore, 3, false, true);
 }
 
 // ── Speech input for confirmation modal ──
