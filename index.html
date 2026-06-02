@@ -1,0 +1,3399 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Darts Training</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #171a22;
+    --surface2: #1e2230;
+    --border: rgba(255,255,255,0.08);
+    --accent: #e8c84a;
+    --accent2: #4a9fe8;
+    --danger: #e84a4a;
+    --success: #4ae884;
+    --text: #f0f2f8;
+    --muted: #7a8099;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; min-height: 100vh; flex-direction: column; }
+  .page.active { display: flex; }
+
+  /* ── STARTSEITE ── */
+  #page-start {
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(232,200,74,0.12) 0%, transparent 60%);
+  }
+
+  .start-header {
+    text-align: center;
+    padding: 3rem 1.5rem 2rem;
+  }
+
+  .dart-logo {
+    width: 64px; height: 64px;
+    margin: 0 auto 1rem;
+    position: relative;
+  }
+
+  .dart-logo svg { width: 100%; height: 100%; }
+
+  .start-title {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .start-subtitle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .mode-grid {
+    padding: 0 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .mode-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.18s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mode-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+
+  .mode-card:active { transform: scale(0.98); }
+  .mode-card:hover::before, .mode-card:active::before { opacity: 1; }
+  .mode-card:hover { background: var(--surface2); border-color: rgba(255,255,255,0.14); }
+
+  .mode-card.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .mode-icon {
+    width: 44px; height: 44px;
+    background: rgba(232,200,74,0.1);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.4rem;
+  }
+
+  .mode-card.disabled .mode-icon {
+    background: rgba(255,255,255,0.05);
+  }
+
+  .mode-info { flex: 1; }
+  .mode-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .mode-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  .mode-badge {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.07);
+    color: var(--muted);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .mode-badge.soon { background: rgba(232,200,74,0.1); color: var(--accent); }
+
+  /* ── SETTINGS ── */
+  .settings-section {
+    padding: 0 1.25rem 2rem;
+  }
+
+  .settings-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    gap: 0.75rem;
+    overflow: hidden;
+  }
+  .settings-row:last-child { border-bottom: none; }
+
+  .settings-row-label {
+    font-size: 0.88rem;
+    color: var(--text);
+  }
+  .settings-row-sub {
+    font-size: 0.74rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+  }
+
+  /* Toggle */
+  .toggle {
+    position: relative;
+    width: 46px; height: 26px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+  .toggle input:checked + .toggle-slider {
+    background: rgba(232,200,74,0.25);
+    border-color: var(--accent);
+  }
+  .toggle input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+    background: var(--accent);
+  }
+
+  /* Volume slider */
+  .volume-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    max-width: 100px;
+    min-width: 0;
+  }
+  .volume-icon { font-size: 0.9rem; color: var(--muted); }
+  input[type=range].vol-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--surface2);
+    outline: none;
+  }
+  input[type=range].vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  /* ── GAME SETUP PAGE ── */
+  #page-setup {
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(74,159,232,0.1) 0%, transparent 50%);
+  }
+
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 0.5rem;
+  }
+
+  .btn-back {
+    width: 36px; height: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-back:active { background: var(--surface2); transform: scale(0.96); }
+
+  .nav-title {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    letter-spacing: 0.04em;
+    color: var(--accent2);
+  }
+
+  .setup-content { padding: 1.5rem 1.25rem; flex: 1; }
+
+  .option-group { margin-bottom: 1.75rem; }
+
+  .option-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .btn-group {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+  .btn-group.two-col { grid-template-columns: repeat(2, 1fr); }
+
+  .opt-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.03em;
+    padding: 0.85rem 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .opt-btn:active { transform: scale(0.96); }
+  .opt-btn.selected {
+    background: rgba(232,200,74,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .opt-btn.two-col { font-size: 1rem; padding: 0.9rem; }
+  .opt-btn.two-col small {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    font-weight: 400;
+    text-transform: none;
+  }
+  .opt-btn.two-col.selected small { color: rgba(232,200,74,0.7); }
+
+  .start-game-btn {
+    display: block;
+    width: 100%;
+    background: var(--accent);
+    color: #0d0f14;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 0.08em;
+    padding: 1rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 2rem;
+  }
+  .start-game-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+  /* ── GAME PAGE ── */
+  #page-game {
+    background: var(--bg);
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .game-header {
+    padding: 0.9rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .game-mode-tag {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+
+  .game-rule-tag {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+
+  .btn-menu {
+    width: 32px; height: 32px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    transition: background 0.15s;
+  }
+  .btn-menu:active { background: var(--surface2); }
+
+  /* Score display */
+  /* 3-column info panel */
+  .info-panel {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem 0;
+    align-items: stretch;
+  }
+
+  /* Left: score */
+  .score-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.75rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .score-area {
+    display: contents;
+  }
+
+  .score-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+
+  .score-main {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+
+  .score-main.updated {
+    animation: score-pop 0.3s ease;
+  }
+
+  @keyframes score-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.08); color: var(--accent); }
+    100% { transform: scale(1); }
+  }
+
+  .score-main.bust {
+    color: var(--danger) !important;
+    animation: bust-shake 0.4s ease;
+  }
+  @keyframes bust-shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* Middle: dart boxes column */
+  .dart-boxes-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 72px;
+  }
+
+  /* Right: stats box */
+  .stats-col {
+    width: 90px;
+  }
+
+  .stats-single-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.6rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 0.3rem;
+  }
+
+  .stats-single-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+  }
+
+  .stats-single-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1;
+  }
+
+  .stats-single-value {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.03em;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  .stats-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0.1rem 0;
+  }
+
+  /* Dart throw boxes */
+  .dart-boxes-row {
+    display: none;
+  }
+  .dart-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.5rem 0.5rem;
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+    min-height: 68px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+  }
+  .dart-box.active {
+    border-color: rgba(232,200,74,0.5);
+    background: rgba(232,200,74,0.05);
+  }
+  .dart-box.filled { border-color: rgba(255,255,255,0.14); }
+  .dart-box.busted {
+    border-color: rgba(232,74,74,0.5);
+    background: rgba(232,74,74,0.05);
+  }
+  .dart-box-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1;
+  }
+  .dart-box-value {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    line-height: 1;
+  }
+  .dart-box.filled .dart-box-value { color: var(--text); }
+  .dart-box.busted .dart-box-value { color: var(--danger); }
+  .dart-box-mod {
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    line-height: 1;
+  }
+  .dart-box-mod.double {
+    background: rgba(74,159,232,0.15);
+    color: var(--accent2);
+    border: 1px solid rgba(74,159,232,0.3);
+  }
+  .dart-box-mod.triple {
+    background: rgba(232,74,74,0.15);
+    color: var(--danger);
+    border: 1px solid rgba(232,74,74,0.3);
+  }
+
+
+
+  .mod-badge {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .mod-badge.double {
+    background: rgba(74,159,232,0.15);
+    color: var(--accent2);
+    border: 1px solid rgba(74,159,232,0.3);
+  }
+  .mod-badge.triple {
+    background: rgba(232,74,74,0.15);
+    color: var(--danger);
+    border: 1px solid rgba(232,74,74,0.3);
+  }
+
+  /* KEYPAD */
+  .keypad {
+    padding: 0.5rem 1rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  /* Modifier row */
+  .mod-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .mod-btn {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: 0.05em;
+    text-align: center;
+    transition: all 0.12s;
+    background: var(--surface);
+    color: var(--muted);
+    line-height: 1;
+  }
+  .mod-btn small {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    margin-top: 0.15rem;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  .mod-btn:active { transform: scale(0.95); }
+  .mod-btn.single {
+    color: rgba(240,242,248,0.4);
+  }
+  .mod-btn.double {
+    color: rgba(74,159,232,0.4);
+    border-color: rgba(74,159,232,0.2);
+  }
+  .mod-btn.triple {
+    color: rgba(232,74,74,0.4);
+    border-color: rgba(232,74,74,0.2);
+  }
+  .mod-btn.single.active {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.3);
+    color: var(--text);
+  }
+  .mod-btn.double.active {
+    background: rgba(74,159,232,0.15);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .mod-btn.triple.active {
+    background: rgba(232,74,74,0.15);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  /* Number grid */
+  .num-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  .num-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+    min-height: 52px;
+  }
+  .num-btn:active {
+    background: var(--surface2);
+    border-color: rgba(255,255,255,0.2);
+    transform: scale(0.94);
+  }
+
+  /* Action buttons row */
+  .action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+  }
+
+  .action-btn {
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    padding: 0.8rem;
+    text-align: center;
+    transition: all 0.12s;
+    border: 1.5px solid;
+  }
+  .action-btn:active { transform: scale(0.95); }
+
+  .btn-miss {
+    background: rgba(232,74,74,0.1);
+    border-color: rgba(232,74,74,0.3);
+    color: var(--danger);
+  }
+  .btn-miss small { display: block; font-family: var(--font-body); font-size: 0.6rem; letter-spacing: 0.05em; color: rgba(232,74,74,0.6); }
+
+  .btn-bull {
+    background: rgba(74,232,132,0.08);
+    border-color: rgba(74,232,132,0.25);
+    color: var(--success);
+  }
+  .btn-bull small { display: block; font-family: var(--font-body); font-size: 0.6rem; letter-spacing: 0.05em; color: rgba(74,232,132,0.5); }
+
+  .btn-undo {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--muted);
+  }
+  .btn-undo small { display: block; font-family: var(--font-body); font-size: 0.6rem; letter-spacing: 0.05em; }
+
+  /* History bar */
+  .history-bar {
+    padding: 0.5rem 1.25rem;
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    scrollbar-width: none;
+  }
+  .history-bar::-webkit-scrollbar { display: none; }
+  .history-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .history-entry {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+  }
+  .history-entry span {
+    color: var(--text);
+    margin-left: 0.25rem;
+  }
+
+  /* ── WIN PAGE ── */
+  #page-win {
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 50% 30%, rgba(74,232,132,0.18) 0%, transparent 60%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .win-icon {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+    animation: win-bounce 0.6s ease;
+  }
+  @keyframes win-bounce {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .win-title {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    letter-spacing: 0.06em;
+    color: var(--success);
+    margin-bottom: 0.75rem;
+    animation: win-slide 0.5s 0.2s both ease;
+  }
+  @keyframes win-slide {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .win-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    animation: win-slide 0.5s 0.35s both ease;
+  }
+
+  .win-stats {
+    margin-top: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    width: 100%;
+    max-width: 320px;
+    animation: win-slide 0.5s 0.5s both ease;
+  }
+
+  .win-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .win-stat-row:last-child { border-bottom: none; }
+  .win-stat-label { font-size: 0.8rem; color: var(--muted); }
+  .win-stat-value { font-family: var(--font-display); font-size: 1.3rem; color: var(--accent); letter-spacing: 0.04em; }
+
+  .countdown-ring {
+    margin-top: 2rem;
+    position: relative;
+    width: 56px; height: 56px;
+    animation: win-slide 0.5s 0.65s both ease;
+  }
+  .countdown-ring svg { transform: rotate(-90deg); }
+  .countdown-ring circle {
+    fill: none;
+    stroke: var(--surface2);
+    stroke-width: 3;
+  }
+  .countdown-ring .progress {
+    stroke: var(--success);
+    stroke-dasharray: 150;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+  }
+  .countdown-text {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--success);
+  }
+
+  /* Bust overlay */
+  .bust-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(232,74,74,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .bust-overlay.show { opacity: 1; }
+  .bust-label {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    letter-spacing: 0.1em;
+    color: var(--danger);
+    text-shadow: 0 0 40px rgba(232,74,74,0.5);
+  }
+
+  /* Player mode & difficulty */
+  .difficulty-group {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    margin-bottom: 0;
+  }
+  .difficulty-group.visible {
+    max-height: 200px;
+    opacity: 1;
+    margin-bottom: 1.75rem;
+  }
+
+  /* Two-player score header */
+  .dual-header { display: none !important; }
+  .player-score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.75rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .player-score-card.current {
+    border-color: var(--accent);
+    background: rgba(232,200,74,0.06);
+  }
+  .player-score-card.ai {
+    border-color: rgba(74,159,232,0.4);
+    background: rgba(74,159,232,0.05);
+  }
+  .player-score-card .ps-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.15rem;
+  }
+  .player-score-card .ps-value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text);
+  }
+  .player-score-card.current .ps-value { color: var(--accent); }
+  .player-score-card.ai .ps-value { color: var(--accent2); }
+  .player-score-card .ps-sub {
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-top: 0.1rem;
+  }
+
+  /* AI thinking overlay */
+  .ai-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,15,20,0.88);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .ai-overlay.show { opacity: 1; pointer-events: all; }
+  .ai-overlay-title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+  .ai-throw-row {
+    display: flex;
+    gap: 0.6rem;
+    margin: 0.75rem 0 0.5rem;
+  }
+  .ai-dart-box {
+    width: 64px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .ai-dart-box.filled {
+    border-color: rgba(74,159,232,0.5);
+    background: rgba(74,159,232,0.07);
+  }
+  .ai-dart-box.busted {
+    border-color: rgba(232,74,74,0.5);
+    background: rgba(232,74,74,0.07);
+  }
+  .ai-dart-box .ai-db-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+  .ai-dart-box .ai-db-val {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--muted);
+    line-height: 1;
+  }
+  .ai-dart-box.filled .ai-db-val { color: var(--accent2); }
+  .ai-dart-box.busted .ai-db-val { color: var(--danger); }
+  .ai-round-total {
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .ai-round-total span {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--accent2);
+    margin-left: 0.3rem;
+  }
+  .ai-remaining {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+  }
+  .ai-remaining span {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  /* vs badge in game header */
+  .vs-badge {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(74,159,232,0.12);
+    color: var(--accent2);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid rgba(74,159,232,0.25);
+    margin-left: 0.4rem;
+  }
+
+  /* Turn indicator below game header */
+  .turn-indicator {
+    display: none;
+    text-align: center;
+    padding: 0.4rem 1.25rem 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .turn-indicator.active { display: block; }
+  .turn-indicator strong { color: var(--accent); font-weight: 500; }
+
+
+  /* ── INPUT MODE TOGGLE ── */
+  .input-mode-bar {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.6rem 1.25rem 0;
+  }
+  .input-mode-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+  .input-mode-btn.active {
+    background: rgba(232,200,74,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .input-mode-btn:active { transform: scale(0.97); }
+
+  /* ── MIC BUTTON ── */
+  .mic-btn {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .mic-btn.listening {
+    background: rgba(232,74,74,0.15);
+    border-color: var(--danger);
+    color: var(--danger);
+    animation: mic-pulse 1.2s ease-in-out infinite;
+  }
+  .mic-btn.muted {
+    background: var(--surface2);
+    color: var(--muted);
+    opacity: 0.5;
+  }
+  @keyframes mic-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(232,74,74,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(232,74,74,0); }
+  }
+
+  /* Speech status bar */
+  .speech-status {
+    display: none;
+    margin: 0.3rem 1.25rem 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.75rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 30px;
+  }
+  .speech-status.active { display: flex; }
+  .speech-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--danger);
+    flex-shrink: 0;
+    animation: mic-pulse 1s infinite;
+  }
+  .speech-dot.idle { background: var(--muted); animation: none; }
+  #speech-transcript {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-style: italic;
+  }
+
+  /* ── SUM KEYPAD ── */
+  .sum-keypad { display: none; flex-direction: column; gap: 0.4rem; padding: 0.5rem 1rem 1rem; flex: 1; }
+  .sum-keypad.active { display: flex; }
+  .dart-keypad { display: flex; flex-direction: column; gap: 0.4rem; padding: 0.5rem 1rem 1rem; flex: 1; }
+
+  /* Sum display bar */
+  .sum-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.45rem 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 52px;
+  }
+  .sum-display-left { display: flex; flex-direction: column; gap: 0.1rem; }
+  .sum-display-val {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .sum-display-val.empty { color: var(--muted); }
+  .sum-display-val.invalid { color: var(--danger); }
+  .sum-display-hint {
+    font-size: 0.65rem;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+
+  /* Combined pad: digits left, quick-scores right */
+  .sum-pad-row {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  /* Digit grid: 3 cols */
+  .digit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 0.4rem;
+  }
+  .digit-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+  }
+  .digit-btn:active { background: var(--surface2); transform: scale(0.94); }
+  .digit-btn.del { color: var(--danger); font-size: 1.2rem; }
+  .digit-btn.clear { color: var(--muted); font-size: 1rem; font-family: var(--font-body); font-weight:600; }
+
+  /* Quick-score grid: 2 cols, 4 rows */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 0.4rem;
+  }
+  .quick-btn {
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+  .quick-btn:active { transform: scale(0.94); background: var(--surface); color: var(--text); }
+  .quick-btn.special {
+    color: var(--accent);
+    border-color: rgba(232,200,74,0.3);
+    background: rgba(232,200,74,0.06);
+  }
+
+  /* Sum action row: REST | ✓ | ↩ */
+  .sum-action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.4rem;
+  }
+  .sum-action-btn {
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    padding: 0.7rem 0.5rem;
+    text-align: center;
+    transition: all 0.12s;
+    border: 1.5px solid;
+  }
+  .sum-action-btn:active { transform: scale(0.95); }
+  .btn-rest {
+    background: rgba(74,159,232,0.1);
+    border-color: rgba(74,159,232,0.35);
+    color: var(--accent2);
+  }
+  .btn-confirm {
+    background: rgba(74,232,132,0.1);
+    border-color: rgba(74,232,132,0.3);
+    color: var(--success);
+    font-size: 1.4rem;
+  }
+  .btn-sum-undo {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--muted);
+  }
+
+  /* ── CHECKOUT MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,15,20,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    padding: 1.5rem;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.25rem;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .modal-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+  .modal-btn-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .modal-dart-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    padding: 0.75rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .modal-dart-btn:hover, .modal-dart-btn:active {
+    background: rgba(232,200,74,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Speech not supported warning */
+  .speech-unsupported {
+    display: none;
+    margin: 0.3rem 1.25rem 0;
+    background: rgba(232,200,74,0.08);
+    border: 1px solid rgba(232,200,74,0.25);
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ START PAGE ════════════════ -->
+<div id="page-start" class="page active">
+  <div class="start-header">
+    <div class="dart-logo">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="30" stroke="rgba(232,200,74,0.2)" stroke-width="1.5"/>
+        <circle cx="32" cy="32" r="20" stroke="rgba(232,200,74,0.35)" stroke-width="1.5"/>
+        <circle cx="32" cy="32" r="10" stroke="rgba(232,200,74,0.55)" stroke-width="1.5"/>
+        <circle cx="32" cy="32" r="3" fill="#e8c84a"/>
+        <!-- dart -->
+        <line x1="52" y1="12" x2="34" y2="30" stroke="#e8c84a" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="52,12 44,16 48,20" fill="#e8c84a"/>
+        <line x1="54" y1="10" x2="58" y2="6" stroke="#e8c84a" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="56" y1="12" x2="60" y2="10" stroke="#e8c84a" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="start-title">DARTS</div>
+    <div class="start-subtitle">Training App</div>
+  </div>
+
+  <div class="section-label">Spielmodus wählen</div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="selectMode('x01')">
+      <div class="mode-icon">🎯</div>
+      <div class="mode-info">
+        <div class="mode-name">X01</div>
+        <div class="mode-desc">Klassisch — von 501/301/201/101 auf Null</div>
+      </div>
+      <div class="mode-badge">Aktiv</div>
+    </div>
+    <div class="mode-card disabled">
+      <div class="mode-icon" style="background:rgba(255,255,255,0.04)">🔢</div>
+      <div class="mode-info">
+        <div class="mode-name">Cricket</div>
+        <div class="mode-desc">20, 19, 18, 17, 16, 15, Bull</div>
+      </div>
+      <div class="mode-badge soon">Bald</div>
+    </div>
+    <div class="mode-card disabled">
+      <div class="mode-icon" style="background:rgba(255,255,255,0.04)">⚡</div>
+      <div class="mode-info">
+        <div class="mode-name">Around the Clock</div>
+        <div class="mode-desc">1 bis 20 der Reihe nach treffen</div>
+      </div>
+      <div class="mode-badge soon">Bald</div>
+    </div>
+  </div>
+
+  <div class="section-label">Einstellungen</div>
+  <div class="settings-section">
+    <div class="settings-card">
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Sprachausgabe</div>
+          <div class="settings-row-sub">Punkte & Restbetrag ansagen</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="tgl-speech" checked onchange="settings.speech = this.checked; persistSettings()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Lautstärke</div>
+        </div>
+        <div class="volume-row">
+          <span class="volume-icon">🔈</span>
+          <input type="range" class="vol-slider" min="0" max="1" step="0.05" value="0.8"
+            id="vol-slider" oninput="settings.volume = parseFloat(this.value); persistSettings()">
+          <span class="volume-icon">🔊</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Vibration</div>
+          <div class="settings-row-sub">Haptisches Feedback bei Eingabe</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="tgl-haptic" checked onchange="settings.haptic = this.checked; persistSettings()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SETUP PAGE ════════════════ -->
+<div id="page-setup" class="page">
+  <div class="nav-bar">
+    <button class="btn-back" onclick="showPage('start')">←</button>
+    <div class="nav-title">X01 EINRICHTEN</div>
+  </div>
+  <div class="setup-content">
+
+    <div class="option-group">
+      <div class="option-label">Spieler</div>
+      <div class="btn-group" id="grp-playermode" style="grid-template-columns:repeat(3,1fr)">
+        <button class="opt-btn selected" style="font-size:1rem;padding:0.75rem 0.3rem" data-val="solo" onclick="selectPlayerMode('solo',this)">
+          SOLO
+          <small style="display:block;font-family:var(--font-body);font-size:0.66rem;color:var(--muted);margin-top:0.2rem;text-transform:none">Einzelspieler</small>
+        </button>
+        <button class="opt-btn" style="font-size:1rem;padding:0.75rem 0.3rem" data-val="cpu" onclick="selectPlayerMode('cpu',this)">
+          VS KI
+          <small style="display:block;font-family:var(--font-body);font-size:0.66rem;color:var(--muted);margin-top:0.2rem;text-transform:none">Gegen Computer</small>
+        </button>
+        <button class="opt-btn" style="font-size:1rem;padding:0.75rem 0.3rem" data-val="pvp" onclick="selectPlayerMode('pvp',this)">
+          VS MENSCH
+          <small style="display:block;font-family:var(--font-body);font-size:0.66rem;color:var(--muted);margin-top:0.2rem;text-transform:none">Zwei Spieler</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- Name inputs (shown per mode) -->
+    <div id="grp-names" style="margin-bottom:1.75rem">
+      <div class="option-label">Spielername</div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem">
+        <input type="text" id="input-p1-name" placeholder="Dein Name" maxlength="16"
+          style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;padding:0.65rem 0.9rem;outline:none;width:100%"
+          oninput="gameConfig.player1Name=this.value.trim()||'Spieler 1'">
+        <input type="text" id="input-p2-name" placeholder="Name Spieler 2" maxlength="16"
+          style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:0.9rem;padding:0.65rem 0.9rem;outline:none;width:100%"
+          oninput="gameConfig.player2Name=this.value.trim()||'Spieler 2'">
+      </div>
+    </div>
+
+    <div class="option-group difficulty-group" id="grp-difficulty-group">
+      <div class="option-label">KI-Schwierigkeitsgrad</div>
+      <div class="btn-group" id="grp-difficulty" style="grid-template-columns:repeat(3,1fr)">
+        <button class="opt-btn selected" style="font-size:1rem;padding:0.75rem 0.3rem" data-val="easy" onclick="selectOption('difficulty','easy',this)">
+          LEICHT
+          <small style="display:block;font-family:var(--font-body);font-size:0.66rem;color:var(--muted);margin-top:0.2rem;text-transform:none">Ø ~35 Pkt</small>
+        </button>
+        <button class="opt-btn" style="font-size:1rem;padding:0.75rem 0.3rem" data-val="medium" onclick="selectOption('difficulty','medium',this)">
+          MITTEL
+          <small style="display:block;font-family:var(--font-body);font-size:0.66rem;color:var(--muted);margin-top:0.2rem;text-transform:none">Ø ~55 Pkt</small>
+        </button>
+        <button class="opt-btn" style="font-size:1rem;padding:0.75rem 0.3rem" data-val="hard" onclick="selectOption('difficulty','hard',this)">
+          SCHWER
+          <small style="display:block;font-family:var(--font-body);font-size:0.66rem;color:var(--muted);margin-top:0.2rem;text-transform:none">Ø ~80 Pkt</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="option-label">Startpunkte</div>
+      <div class="btn-group" id="grp-points">
+        <button class="opt-btn selected" data-val="501" onclick="selectOption('points',501,this)">501</button>
+        <button class="opt-btn" data-val="301" onclick="selectOption('points',301,this)">301</button>
+        <button class="opt-btn" data-val="201" onclick="selectOption('points',201,this)">201</button>
+        <button class="opt-btn" data-val="101" onclick="selectOption('points',101,this)">101</button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="option-label">Einwurf-Regel (In)</div>
+      <div class="btn-group two-col" id="grp-in">
+        <button class="opt-btn two-col selected" data-val="straight" onclick="selectOption('in','straight',this)">
+          STRAIGHT IN
+          <small>Direkt spielen</small>
+        </button>
+        <button class="opt-btn two-col" data-val="double" onclick="selectOption('in','double',this)">
+          DOUBLE IN
+          <small>Erst Double treffen</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="option-label">Abschluss-Regel (Out)</div>
+      <div class="btn-group two-col" id="grp-out">
+        <button class="opt-btn two-col" data-val="single" onclick="selectOption('out','single',this)">
+          SINGLE OUT
+          <small>Beliebiges Feld</small>
+        </button>
+        <button class="opt-btn two-col selected" data-val="double" onclick="selectOption('out','double',this)">
+          DOUBLE OUT
+          <small>Auf Double beenden</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="option-label">Runden-Limit</div>
+      <div class="btn-group two-col" id="grp-limit">
+        <button class="opt-btn two-col selected" data-val="0" onclick="selectOption('limit',0,this)">
+          KEIN LIMIT
+          <small>Unbegrenzt spielen</small>
+        </button>
+        <button class="opt-btn two-col" data-val="20" onclick="selectOption('limit',20,this)">
+          20 RUNDEN
+          <small>Max. 20 Runden</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group" style="margin-top:1.75rem">
+      <div class="option-label">Eingabemodus</div>
+      <div class="btn-group two-col" id="grp-inputmode">
+        <button class="opt-btn two-col selected" data-val="dart" onclick="selectOption('inputmode','dart',this);gameConfig.inputMode='dart'">
+          🎯 EINZELDART
+          <small>Jeden Dart einzeln eingeben</small>
+        </button>
+        <button class="opt-btn two-col" data-val="sum" onclick="selectOption('inputmode','sum',this);gameConfig.inputMode='sum'">
+          ∑ SUMME
+          <small>Summe aller 3 Darts eingeben</small>
+        </button>
+      </div>
+    </div>
+
+    <button class="start-game-btn" onclick="startGame()">SPIEL STARTEN →</button>
+  </div>
+</div>
+
+<!-- ════════════════ GAME PAGE ════════════════ -->
+<div id="page-game" class="page">
+  <div class="game-header">
+    <div class="game-mode-tag" id="game-mode-tag">X01</div>
+    <div class="game-rule-tag" id="game-rule-tag">DOUBLE OUT</div>
+    <button class="mic-btn muted" id="mic-btn" onclick="toggleMic()" title="Spracheingabe">🎤</button>
+    <button class="btn-menu" onclick="confirmQuit()">✕</button>
+  </div>
+
+  <div class="speech-status" id="speech-status">
+    <div class="speech-dot idle" id="speech-dot"></div>
+    <span id="speech-transcript">Warte auf Sprache…</span>
+  </div>
+  <div class="speech-unsupported" id="speech-unsupported">
+    ⚠ Spracheingabe wird von diesem Browser nicht unterstützt (Chrome/Edge empfohlen)
+  </div>
+
+  <!-- Turn indicator -->
+  <div class="turn-indicator" id="turn-indicator">
+    Du bist dran — <strong id="turn-player-name">Spieler 1</strong>
+  </div>
+
+  <!-- Dual score header (multiplayer) -->
+  <div class="dual-header" id="dual-header">
+    <div class="player-score-card current" id="pcard-human">
+      <div class="ps-label">Du</div>
+      <div class="ps-value" id="ps-human">501</div>
+      <div class="ps-sub" id="ps-human-sub">Am Zug</div>
+    </div>
+    <div class="player-score-card" id="pcard-opponent">
+      <div class="ps-label" id="ps-opp-label">Gegner</div>
+      <div class="ps-value" id="ps-opponent">501</div>
+      <div class="ps-sub" id="ps-opp-sub">Wartet</div>
+    </div>
+  </div>
+
+  <!-- AI thinking overlay -->
+  <div class="ai-overlay" id="ai-overlay">
+    <div class="ai-overlay-title" id="ai-overlay-title">KI denkt nach…</div>
+    <div class="ai-throw-row">
+      <div class="ai-dart-box" id="ai-dbox-1"><div class="ai-db-label">Dart 1</div><div class="ai-db-val" id="ai-dbox-val-1">—</div></div>
+      <div class="ai-dart-box" id="ai-dbox-2"><div class="ai-db-label">Dart 2</div><div class="ai-db-val" id="ai-dbox-val-2">—</div></div>
+      <div class="ai-dart-box" id="ai-dbox-3"><div class="ai-db-label">Dart 3</div><div class="ai-db-val" id="ai-dbox-val-3">—</div></div>
+    </div>
+    <div class="ai-round-total">Runde:<span id="ai-round-score">—</span></div>
+    <div class="ai-remaining">Verbleibend: <span id="ai-remaining-display">—</span></div>
+  </div>
+
+  <div class="info-panel">
+    <!-- Left: Score -->
+    <div class="score-col" id="score-col">
+      <!-- Solo mode -->
+      <div id="score-solo">
+        <div class="score-label">VERBLEIBEND</div>
+        <div class="score-main" id="score-display">501</div>
+        <div style="font-size:0.62rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:0.35rem" id="round-label">Runde 1</div>
+      </div>
+      <!-- Multi mode (hidden in solo) -->
+      <div id="score-multi" style="display:none;width:100%">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.3rem;width:100%">
+          <div id="mcard-human" style="flex:1;padding:0.3rem 0.4rem;border-radius:6px;border:1px solid var(--accent);background:rgba(232,200,74,0.06)">
+            <div style="font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)" id="mcard-p1-label">Du</div>
+            <div style="font-family:var(--font-display);font-size:2rem;line-height:1;color:var(--accent)" id="mcard-p1-score">501</div>
+            <div style="font-size:0.58rem;color:var(--muted);margin-top:0.1rem" id="mcard-p1-sub">Am Zug</div>
+          </div>
+          <div id="mcard-opp" style="flex:1;padding:0.3rem 0.4rem;border-radius:6px;border:1px solid var(--border);background:transparent">
+            <div style="font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)" id="mcard-p2-label">Gegner</div>
+            <div style="font-family:var(--font-display);font-size:2rem;line-height:1;color:var(--muted)" id="mcard-p2-score">501</div>
+            <div style="font-size:0.58rem;color:var(--muted);margin-top:0.1rem" id="mcard-p2-sub">Wartet</div>
+          </div>
+        </div>
+        <div style="font-size:0.62rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:0.4rem" id="round-label-multi">Runde 1</div>
+      </div>
+    </div>
+
+    <!-- Middle: Dart boxes -->
+    <div class="dart-boxes-col">
+      <div class="dart-box active" id="dbox-1">
+        <div class="dart-box-label">Dart 1</div>
+        <div class="dart-box-value" id="dbox-val-1">—</div>
+      </div>
+      <div class="dart-box" id="dbox-2">
+        <div class="dart-box-label">Dart 2</div>
+        <div class="dart-box-value" id="dbox-val-2">—</div>
+      </div>
+      <div class="dart-box" id="dbox-3">
+        <div class="dart-box-label">Dart 3</div>
+        <div class="dart-box-value" id="dbox-val-3">—</div>
+      </div>
+    </div>
+
+    <!-- Right: Stats -->
+    <div class="stats-col">
+      <div class="stats-single-box">
+        <div class="stats-single-row">
+          <div class="stats-single-label">Ø Gesamt</div>
+          <div class="stats-single-value" id="stat-avg-total">—</div>
+        </div>
+        <div class="stats-divider"></div>
+        <div class="stats-single-row">
+          <div class="stats-single-label">Beste Runde</div>
+          <div class="stats-single-value" id="stat-best">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DART KEYPAD ══ -->
+  <div class="dart-keypad" id="dart-keypad">
+    <div class="mod-row">
+      <button class="mod-btn single active" id="mod-single" onclick="setModifier('single')">
+        1×<small>Single</small>
+      </button>
+      <button class="mod-btn double" id="mod-double" onclick="setModifier('double')">
+        2×<small>Double</small>
+      </button>
+      <button class="mod-btn triple" id="mod-triple" onclick="setModifier('triple')">
+        3×<small>Triple</small>
+      </button>
+    </div>
+    <div class="num-grid">
+      <button class="num-btn" onclick="numPress(1)">1</button>
+      <button class="num-btn" onclick="numPress(2)">2</button>
+      <button class="num-btn" onclick="numPress(3)">3</button>
+      <button class="num-btn" onclick="numPress(4)">4</button>
+      <button class="num-btn" onclick="numPress(5)">5</button>
+      <button class="num-btn" onclick="numPress(6)">6</button>
+      <button class="num-btn" onclick="numPress(7)">7</button>
+      <button class="num-btn" onclick="numPress(8)">8</button>
+      <button class="num-btn" onclick="numPress(9)">9</button>
+      <button class="num-btn" onclick="numPress(10)">10</button>
+      <button class="num-btn" onclick="numPress(11)">11</button>
+      <button class="num-btn" onclick="numPress(12)">12</button>
+      <button class="num-btn" onclick="numPress(13)">13</button>
+      <button class="num-btn" onclick="numPress(14)">14</button>
+      <button class="num-btn" onclick="numPress(15)">15</button>
+      <button class="num-btn" onclick="numPress(16)">16</button>
+      <button class="num-btn" onclick="numPress(17)">17</button>
+      <button class="num-btn" onclick="numPress(18)">18</button>
+      <button class="num-btn" onclick="numPress(19)">19</button>
+      <button class="num-btn" onclick="numPress(20)">20</button>
+    </div>
+    <div class="action-row">
+      <button class="action-btn btn-miss" onclick="throwMiss()">
+        MISS<small>Vorbei</small>
+      </button>
+      <button class="action-btn btn-bull" onclick="throwBull()">
+        BULL<small>25 / 50</small>
+      </button>
+      <button class="action-btn btn-undo" onclick="undoLast()">
+        ↩<small>Rückgängig</small>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ SUM KEYPAD ══ -->
+  <div class="sum-keypad" id="sum-keypad">
+    <!-- Display -->
+    <div class="sum-display">
+      <div class="sum-display-left">
+        <div style="font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)" id="sum-mode-label">PUNKTE</div>
+        <div class="sum-display-val empty" id="sum-display-val">—</div>
+      </div>
+      <div class="sum-display-hint" id="sum-display-hint">max. 180</div>
+    </div>
+
+    <!-- Combined pad: digits (left 3 cols) + quick scores (right 2 cols) -->
+    <div class="sum-pad-row">
+      <!-- Digit grid 3×4 -->
+      <div class="digit-grid">
+        <button class="digit-btn" onclick="sumDigit(1)">1</button>
+        <button class="digit-btn" onclick="sumDigit(2)">2</button>
+        <button class="digit-btn" onclick="sumDigit(3)">3</button>
+        <button class="digit-btn" onclick="sumDigit(4)">4</button>
+        <button class="digit-btn" onclick="sumDigit(5)">5</button>
+        <button class="digit-btn" onclick="sumDigit(6)">6</button>
+        <button class="digit-btn" onclick="sumDigit(7)">7</button>
+        <button class="digit-btn" onclick="sumDigit(8)">8</button>
+        <button class="digit-btn" onclick="sumDigit(9)">9</button>
+        <button class="digit-btn clear" onclick="sumClear()">C</button>
+        <button class="digit-btn" onclick="sumDigit(0)">0</button>
+        <button class="digit-btn del" onclick="sumDel()">⌫</button>
+      </div>
+      <!-- Quick-score grid 2×4 -->
+      <div class="quick-grid">
+        <button class="quick-btn" onclick="sumQuick(26)">26</button>
+        <button class="quick-btn" onclick="sumQuick(41)">41</button>
+        <button class="quick-btn" onclick="sumQuick(45)">45</button>
+        <button class="quick-btn" onclick="sumQuick(60)">60</button>
+        <button class="quick-btn" onclick="sumQuick(81)">81</button>
+        <button class="quick-btn" onclick="sumQuick(85)">85</button>
+        <button class="quick-btn" onclick="sumQuick(100)">100</button>
+        <button class="quick-btn" onclick="sumQuick(121)">121</button>
+        <button class="quick-btn special" onclick="sumQuick(140)">140</button>
+        <button class="quick-btn special" onclick="sumQuick(180)">180</button>
+      </div>
+    </div>
+
+    <!-- Actions: REST | ✓ | ↩ -->
+    <div class="sum-action-row">
+      <button class="sum-action-btn btn-rest" onclick="sumCommitRest()">
+        REST<small style="display:block;font-family:var(--font-body);font-size:0.6rem;letter-spacing:0.05em">Restwert</small>
+      </button>
+      <button class="sum-action-btn btn-confirm" onclick="sumCommitScore()">✓</button>
+      <button class="sum-action-btn btn-sum-undo" onclick="undoLast()">
+        ↩<small style="display:block;font-family:var(--font-body);font-size:0.6rem;letter-spacing:0.05em">Zurück</small>
+      </button>
+    </div>
+  </div>
+
+  <div class="history-bar">
+    <span class="history-label">Verlauf:</span>
+    <div id="history-list" style="display:flex;gap:0.4rem;align-items:center;"></div>
+  </div>
+</div>
+
+<!-- ════════════════ WIN PAGE ════════════════ -->
+<div id="page-win" class="page">
+  <div class="win-icon">🎯</div>
+  <div class="win-title">SPIEL GEWONNEN!</div>
+  <div class="win-sub" id="win-sub">Hervorragende Leistung</div>
+  <div class="win-stats" id="win-stats">
+    <div class="win-stat-row">
+      <span class="win-stat-label">Runden gespielt</span>
+      <span class="win-stat-value" id="ws-rounds">—</span>
+    </div>
+    <div class="win-stat-row">
+      <span class="win-stat-label">Geworfene Pfeile</span>
+      <span class="win-stat-value" id="ws-darts">—</span>
+    </div>
+    <div class="win-stat-row">
+      <span class="win-stat-label">Ø Punkte/Runde</span>
+      <span class="win-stat-value" id="ws-avg">—</span>
+    </div>
+    <div class="win-stat-row">
+      <span class="win-stat-label">Höchste Runde</span>
+      <span class="win-stat-value" id="ws-best">—</span>
+    </div>
+  </div>
+  <div class="countdown-ring">
+    <svg viewBox="0 0 56 56" width="56" height="56">
+      <circle cx="28" cy="28" r="24"/>
+      <circle class="progress" cx="28" cy="28" r="24" id="countdown-circle" stroke-dasharray="150.8" stroke-dashoffset="0"/>
+    </svg>
+    <div class="countdown-text" id="countdown-num">5</div>
+  </div>
+</div>
+
+<!-- QUIT MODAL -->
+<div class="modal-overlay" id="quit-modal">
+  <div class="modal-card">
+    <div class="modal-title" style="color:var(--danger)">SPIEL BEENDEN?</div>
+    <div class="modal-sub">Der aktuelle Spielstand geht verloren.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem">
+      <button class="modal-dart-btn" style="border-color:rgba(232,74,74,0.4);color:var(--danger)" onclick="doQuit()">JA</button>
+      <button class="modal-dart-btn" onclick="cancelQuit()">NEIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUST OVERLAY -->
+<div class="bust-overlay" id="bust-overlay">
+  <div class="bust-label">BUST!</div>
+</div>
+
+<!-- CHECKOUT DART MODAL (sum mode win) -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal-card">
+    <div class="modal-title">CHECKOUT! 🎯</div>
+    <div class="modal-sub">Mit welchem Dart hast du das Spiel beendet?</div>
+    <div class="modal-btn-row">
+      <button class="modal-dart-btn" onclick="confirmCheckoutDart(1)">1.<br><small style="font-size:0.65rem;font-family:var(--font-body);color:var(--muted)">Dart</small></button>
+      <button class="modal-dart-btn" onclick="confirmCheckoutDart(2)">2.<br><small style="font-size:0.65rem;font-family:var(--font-body);color:var(--muted)">Dart</small></button>
+      <button class="modal-dart-btn" onclick="confirmCheckoutDart(3)">3.<br><small style="font-size:0.65rem;font-family:var(--font-body);color:var(--muted)">Dart</small></button>
+    </div>
+  </div>
+</div>
+
+<!-- BUST DART MODAL (sum mode bust) -->
+<div class="modal-overlay" id="bust-dart-modal">
+  <div class="modal-card">
+    <div class="modal-title" style="color:var(--danger)">BUST!</div>
+    <div class="modal-sub">Mit welchem Dart ist der Bust passiert?</div>
+    <div class="modal-btn-row">
+      <button class="modal-dart-btn" onclick="confirmBustDart(1)">1.<br><small style="font-size:0.65rem;font-family:var(--font-body);color:var(--muted)">Dart</small></button>
+      <button class="modal-dart-btn" onclick="confirmBustDart(2)">2.<br><small style="font-size:0.65rem;font-family:var(--font-body);color:var(--muted)">Dart</small></button>
+      <button class="modal-dart-btn" onclick="confirmBustDart(3)">3.<br><small style="font-size:0.65rem;font-family:var(--font-body);color:var(--muted)">Dart</small></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  APP STATE
+// ════════════════════════════════════════════
+// Load persisted settings & config
+function loadPersisted() {
+  try {
+    const s = JSON.parse(localStorage.getItem('dartsSettings') || '{}');
+    if (s.speech !== undefined) settings.speech = s.speech;
+    if (s.haptic !== undefined) settings.haptic = s.haptic;
+    if (s.volume !== undefined) settings.volume = s.volume;
+    const c = JSON.parse(localStorage.getItem('dartsConfig') || '{}');
+    if (c.points) gameConfig.points = c.points;
+    if (c.inRule) gameConfig.inRule = c.inRule;
+    if (c.outRule) gameConfig.outRule = c.outRule;
+    if (c.limit !== undefined) gameConfig.limit = c.limit;
+    if (c.playerMode) gameConfig.playerMode = c.playerMode;
+    if (c.difficulty) gameConfig.difficulty = c.difficulty;
+    if (c.inputMode) gameConfig.inputMode = c.inputMode;
+  } catch(e) {}
+}
+function persistSettings() {
+  try {
+    localStorage.setItem('dartsSettings', JSON.stringify({
+      speech: settings.speech, haptic: settings.haptic, volume: settings.volume
+    }));
+  } catch(e) {}
+}
+function persistConfig() {
+  try {
+    localStorage.setItem('dartsConfig', JSON.stringify({
+      points: gameConfig.points, inRule: gameConfig.inRule, outRule: gameConfig.outRule,
+      limit: gameConfig.limit, playerMode: gameConfig.playerMode, difficulty: gameConfig.difficulty, inputMode: gameConfig.inputMode
+    }));
+  } catch(e) {}
+}
+const settings = { speech: true, haptic: true, volume: 0.8 };
+
+const gameConfig = { points: 501, inRule: 'straight', outRule: 'double', limit: 0, playerMode: 'solo', difficulty: 'easy', player1Name: 'Spieler 1', player2Name: 'Spieler 2', inputMode: 'dart' };
+
+let gameState = {
+  startPoints: 501,
+  remaining: 501,
+  round: 1,
+  dartInRound: 0,
+  throwsThisRound: [],
+  modifier: 'single',
+  history: [],
+  totalDarts: 0,
+  highestRound: 0,
+  inGame: false,
+  inputMode: 'dart',   // 'dart' | 'sum'
+  sumInputStr: '',     // digit string being built in sum mode
+  sumPendingScore: null, // null or {scored, newRemaining}
+  micActive: false,
+  micMuted: false,
+  // Multiplayer
+  currentTurn: 'human',
+  humanRemaining: 501,
+  opponentRemaining: 501,
+  humanHistory: [],
+  opponentHistory: [],
+  winner: null,
+};
+
+// ── Valid scores with 3 darts (impossible scores) ──
+const IMPOSSIBLE_3DART = new Set([179,178,176,175,173,172,169,166,163,162,159]);
+function isValidScore(n) {
+  if (n < 0 || n > 180) return false;
+  if (IMPOSSIBLE_3DART.has(n)) return false;
+  return true;
+}
+
+// ════════════════════════════════════════════
+//  PAGES
+// ════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  page.classList.add('active');
+}
+
+function selectMode(mode) {
+  if (mode !== 'x01') return;
+  showPage('setup');
+}
+
+function selectPlayerMode(val, btn) {
+  const grp = document.getElementById('grp-playermode');
+  grp.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  gameConfig.playerMode = val;
+  const diffGroup = document.getElementById('grp-difficulty-group');
+  diffGroup.classList.toggle('visible', val === 'cpu');
+  const p2Input = document.getElementById('input-p2-name');
+  const p1Input = document.getElementById('input-p1-name');
+  p2Input.style.display = val === 'pvp' ? 'block' : 'none';
+  p1Input.placeholder = val === 'pvp' ? 'Name Spieler 1' : 'Dein Name';
+}
+
+// ════════════════════════════════════════════
+//  SETUP
+// ════════════════════════════════════════════
+function selectOption(group, val, btn) {
+  const grp = document.getElementById('grp-' + group);
+  grp.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  if (group === 'points') gameConfig.points = val;
+  else if (group === 'in') gameConfig.inRule = val;
+  else if (group === 'out') gameConfig.outRule = val;
+  else if (group === 'limit') gameConfig.limit = val;
+  else if (group === 'difficulty') gameConfig.difficulty = val;
+  else if (group === 'inputmode') { gameConfig.inputMode = val; gameState.inputMode = val; }
+}
+
+function startGame() {
+  haptic(10);
+  const isMulti = gameConfig.playerMode !== 'solo';
+  gameState = {
+    startPoints: gameConfig.points,
+    remaining: gameConfig.points,
+    round: 1,
+    dartInRound: 0,
+    throwsThisRound: [],
+    modifier: 'single',
+    history: [],
+    totalDarts: 0,
+    highestRound: 0,
+    inGame: gameConfig.inRule === 'straight',
+    currentTurn: 'human',
+    humanRemaining: gameConfig.points,
+    opponentRemaining: gameConfig.points,
+    humanHistory: [],
+    opponentHistory: [],
+    winner: null,
+  };
+
+  // Update UI labels
+  document.getElementById('game-mode-tag').textContent = gameConfig.points;
+  const outLabel = gameConfig.outRule === 'double' ? 'DOUBLE OUT' : 'SINGLE OUT';
+  const inLabel = gameConfig.inRule === 'double' ? ' / DOUBLE IN' : '';
+  document.getElementById('game-rule-tag').textContent = outLabel + inLabel;
+
+  // Multiplayer UI
+  const turnInd = document.getElementById('turn-indicator');
+  const p1Name = gameConfig.player1Name || 'Spieler 1';
+  const p2Name = gameConfig.playerMode === 'cpu'
+    ? 'KI (' + {easy:'Leicht',medium:'Mittel',hard:'Schwer'}[gameConfig.difficulty] + ')'
+    : (gameConfig.player2Name || 'Spieler 2');
+
+  if (isMulti) {
+    // Show multi score layout
+    document.getElementById('score-solo').style.display = 'none';
+    document.getElementById('score-multi').style.display = 'block';
+    document.getElementById('mcard-p1-label').textContent = p1Name;
+    document.getElementById('mcard-p2-label').textContent = p2Name;
+    document.getElementById('mcard-p1-score').textContent = gameConfig.points;
+    document.getElementById('mcard-p2-score').textContent = gameConfig.points;
+    document.getElementById('mcard-p1-sub').textContent = 'Am Zug';
+    document.getElementById('mcard-p2-sub').textContent = 'Wartet';
+    document.getElementById('round-label-multi').textContent = 'Runde 1';
+    turnInd.classList.add('active');
+    document.getElementById('turn-player-name').textContent = p1Name;
+  } else {
+    document.getElementById('score-solo').style.display = 'block';
+    document.getElementById('score-multi').style.display = 'none';
+    turnInd.classList.remove('active');
+  }
+
+  updateScoreDisplay();
+  updateDarts();
+  updateRoundScores();
+  setModifier('single');
+  document.getElementById('history-list').innerHTML = '';
+  [1,2,3].forEach(i => {
+    const val = document.getElementById('dbox-val-' + i);
+    val.innerHTML = '—';
+    val.style.display = '';
+    const box = document.getElementById('dbox-' + i);
+    box.className = 'dart-box' + (i === 1 ? ' active' : '');
+  });
+  document.getElementById('stat-avg-total').textContent = '—';
+  document.getElementById('stat-best').textContent = '—';
+
+  // Reset input mode UI
+  setInputMode(gameState.inputMode || 'dart');
+  // Mic init (if previously active, reopen)
+  if (micActive) {
+    try { speechRecognition && speechRecognition.abort(); } catch(e) {}
+    micActive = false;
+    document.getElementById('mic-btn').classList.remove('listening');
+    document.getElementById('mic-btn').classList.add('muted');
+    document.getElementById('speech-status').classList.remove('active');
+  }
+  if (!speechRecognition) initSpeech();
+  sumClear();
+  persistConfig();
+  showPage('game');
+}
+
+// ════════════════════════════════════════════
+//  GAME LOGIC
+// ════════════════════════════════════════════
+function setModifier(mod) {
+  gameState.modifier = mod;
+  ['single','double','triple'].forEach(m => {
+    document.getElementById('mod-' + m).classList.toggle('active', m === mod);
+  });
+  updateInputDisplay();
+}
+
+function numPress(n) {
+  haptic(8);
+  if (gameState.dartInRound >= 3) return;
+
+  const mod = gameState.modifier;
+  const multiplier = mod === 'single' ? 1 : mod === 'double' ? 2 : 3;
+  const scored = n * multiplier;
+
+  processThrow(scored, n, mod);
+}
+
+function throwMiss() {
+  haptic(8);
+  if (gameState.dartInRound >= 3) return;
+  processThrow(0, 0, 'miss');
+}
+
+function throwBull() {
+  haptic(8);
+  if (gameState.dartInRound >= 3) return;
+
+  const mod = gameState.modifier;
+  let scored;
+  if (mod === 'double') {
+    scored = 50; // Double Bull
+    processThrow(scored, 'Bull', 'double');
+  } else {
+    scored = 25; // Single Bull
+    processThrow(scored, 'Bull', 'single');
+  }
+}
+
+function processThrow(scored, field, mod) {
+  const gs = gameState;
+  const prev = gs.remaining;
+
+  // Double-In check
+  if (!gs.inGame) {
+    if (mod !== 'double' && !(field === 'Bull' && mod === 'double')) {
+      // Miss for double-in
+      gs.throwsThisRound.push({ scored: 0, field, mod, busted: false, missedIn: true });
+      gs.dartInRound++;
+      gs.totalDarts++;
+      setModifier('single');
+      updateDarts();
+      if (gs.dartInRound >= 3) endRound(false);
+      return;
+    }
+    gs.inGame = true;
+  }
+
+  const newRemaining = prev - scored;
+
+  // BUST conditions
+  let busted = false;
+  if (newRemaining < 0) busted = true;
+  if (newRemaining === 1) busted = true; // Can't finish on 1
+  if (newRemaining === 0 && gameConfig.outRule === 'double' && mod !== 'double' && !(field === 'Bull' && mod === 'double')) {
+    busted = true;
+  }
+
+  if (busted) {
+    gs.throwsThisRound.push({ scored, field, mod, busted: true });
+    gs.dartInRound++;
+    gs.totalDarts++;
+    updateDarts();
+    updateStats();
+    showBust();
+    // Always end round immediately on bust (even with darts remaining)
+    setTimeout(() => endRound(true), 850);
+    return;
+  }
+
+  gs.remaining = newRemaining;
+  gs.throwsThisRound.push({ scored, field, mod, busted: false });
+  gs.dartInRound++;
+  gs.totalDarts++;
+
+  setModifier('single');
+  updateScoreDisplay(true);
+  updateDarts();
+  updateStats();
+
+  // WIN condition
+  if (gs.remaining === 0) {
+    endRound(false, true);
+    return;
+  }
+
+  // Auto-advance round after 3 darts
+  if (gs.dartInRound >= 3) {
+    endRound(false);
+  }
+}
+
+function endRound(busted, won = false) {
+  const gs = gameState;
+  const throws = gs.throwsThisRound;
+  const roundScore = throws.reduce((s, t) => s + (busted ? 0 : t.busted ? 0 : t.scored), 0);
+
+  // Actually we want the total non-bust thrown this round
+  const actualScore = busted
+    ? 0
+    : throws.reduce((s, t) => s + (t.busted ? 0 : t.scored), 0);
+
+  const remainAfter = busted ? (gs.history.length > 0 ? gs.history[gs.history.length-1].remainAfter : gs.startPoints) : gs.remaining;
+
+  if (busted) {
+    gs.remaining = gs.history.length > 0
+      ? gs.history[gs.history.length-1].remainAfter
+      : gs.startPoints;
+    updateScoreDisplay();
+  }
+
+  gs.history.push({
+    round: gs.round,
+    throws: throws.map(t => t.scored),
+    total: actualScore,
+    remainAfter: gs.remaining,
+  });
+
+  if (actualScore > gs.highestRound) gs.highestRound = actualScore;
+
+  addHistoryEntry(gs.round, actualScore, busted);
+
+  if (won) {
+    const winner = (gameConfig.playerMode !== 'solo' && gs.currentTurn === 'opponent') ? 'opponent' : 'human';
+    announceWin(winner);
+    setTimeout(() => showWin(winner), 800);
+    return;
+  }
+
+  // Speech after round
+  if (settings.speech && !busted) {
+    const remaining = gs.remaining;
+    speakRound(actualScore, remaining);
+  } else if (settings.speech && busted) {
+    speak('Bust!');
+  }
+
+  // Multiplayer: switch turns
+  if (gameConfig.playerMode !== 'solo') {
+    if (gs.currentTurn === 'human') {
+      gs.humanRemaining = gs.remaining;
+      gs.humanHistory.push({ round: gs.round, total: actualScore, remain: gs.remaining });
+      updateDualScores();
+      gs.currentTurn = 'opponent';
+      gs.round++;
+      gs.dartInRound = 0;
+      gs.throwsThisRound = [];
+      setModifier('single');
+      updateRoundScores();
+      updateDarts();
+      updateStats();
+      switchToOpponent();
+      return;
+    } else {
+      gs.opponentRemaining = gs.remaining;
+      gs.opponentHistory.push({ round: gs.round, total: actualScore, remain: gs.remaining });
+      updateDualScores();
+      gs.currentTurn = 'human';
+      gs.remaining = gs.humanRemaining;
+      gs.round++;
+      gs.dartInRound = 0;
+      gs.throwsThisRound = [];
+      setModifier('single');
+      updateScoreDisplay();
+      updateRoundScores();
+      updateDarts();
+      updateStats();
+      updateTurnIndicator();
+      return;
+    }
+  }
+
+  // Next round (solo)
+  gs.round++;
+  gs.dartInRound = 0;
+  gs.throwsThisRound = [];
+  setModifier('single');
+  updateRoundScores();
+  updateDarts();
+  updateStats();
+}
+
+function undoLast() {
+  haptic(15);
+  const gs = gameState;
+  if (gs.dartInRound === 0) {
+    // Undo last completed round
+    if (gs.history.length === 0) return;
+    const last = gs.history.pop();
+    gs.round--;
+    gs.dartInRound = 0;
+    gs.throwsThisRound = [];
+    gs.remaining = last.remainAfter + last.total; // restore
+    // Re-check from previous history
+    if (gs.history.length > 0) {
+      gs.remaining = gs.history[gs.history.length-1].remainAfter;
+    } else {
+      gs.remaining = gs.startPoints;
+    }
+    gs.totalDarts = Math.max(0, gs.totalDarts - 3);
+    removeLastHistoryEntry();
+    updateScoreDisplay();
+    updateRoundScores();
+    updateDarts();
+    updateStats();
+    return;
+  }
+  // Undo last throw in current round
+  const last = gs.throwsThisRound.pop();
+  if (!last) return;
+  if (!last.busted && !last.missedIn) {
+    gs.remaining += last.scored;
+  }
+  gs.dartInRound--;
+  gs.totalDarts--;
+  updateScoreDisplay();
+  updateDarts();
+  updateStats();
+}
+
+// ════════════════════════════════════════════
+//  UI UPDATES
+// ════════════════════════════════════════════
+function updateScoreDisplay(animate = false) {
+  const el = document.getElementById('score-display');
+  el.textContent = gameState.remaining;
+  if (animate) {
+    el.classList.remove('updated');
+    void el.offsetWidth;
+    el.classList.add('updated');
+  }
+}
+
+function updateDarts() {
+  const gs = gameState;
+  const n = gs.dartInRound;
+  [1,2,3].forEach(i => {
+    const box = document.getElementById('dbox-' + i);
+    const val = document.getElementById('dbox-val-' + i);
+    const throw_ = gs.throwsThisRound[i - 1];
+    box.className = 'dart-box';
+    if (throw_) {
+      if (throw_.busted) {
+        box.classList.add('busted');
+      } else {
+        box.classList.add('filled');
+      }
+      // Build label
+      const fieldLabel = throw_.field === 0 ? 'MISS' : (throw_.field === 'Bull' ? 'BULL' : throw_.field.toString());
+      const modPrefix = throw_.mod === 'double' ? 'D' : throw_.mod === 'triple' ? 'T' : '';
+      if (modPrefix) {
+        val.innerHTML = `<span class="dart-box-mod ${throw_.mod}">${modPrefix}</span><span>${throw_.scored}</span>`;
+        val.style.display = 'flex';
+        val.style.flexDirection = 'column';
+        val.style.alignItems = 'center';
+        val.style.gap = '2px';
+      } else {
+        val.innerHTML = throw_.scored === 0 ? 'MISS' : throw_.scored.toString();
+        val.style.display = '';
+      }
+    } else {
+      val.innerHTML = '—';
+      val.style.display = '';
+      if (i === n + 1) box.classList.add('active');
+    }
+  });
+  // First box active when no throws yet
+  if (n === 0) document.getElementById('dbox-1').classList.add('active');
+}
+
+function updateRoundScores() {
+  const el = document.getElementById('round-label');
+  if (el) el.textContent = 'Runde ' + gameState.round;
+  const el2 = document.getElementById('round-label-multi');
+  if (el2) el2.textContent = 'Runde ' + gameState.round;
+}
+
+function updateStats() {
+  const gs = gameState;
+  // Avg of current round throws so far
+  // Overall average per 3 darts across completed rounds
+  const completedRounds = gs.history.filter(r => r.total > 0 || gs.history.length > 0);
+  if (gs.history.length > 0) {
+    const totalScored = gs.startPoints - gs.remaining;
+    const totalRounds = gs.history.length;
+    const avgTotal = Math.round((totalScored / totalRounds) * 10) / 10;
+    document.getElementById('stat-avg-total').textContent = avgTotal.toFixed(1);
+  } else {
+    document.getElementById('stat-avg-total').textContent = '—';
+  }
+
+  document.getElementById('stat-best').textContent = gs.highestRound > 0 ? gs.highestRound : '—';
+}
+
+function updateInputDisplay(field, mod, scored) {
+  // No-op: display is now handled by updateDarts()
+}
+
+function showBust() {
+  const overlay = document.getElementById('bust-overlay');
+  const scoreEl = document.getElementById('score-display');
+  overlay.classList.add('show');
+  scoreEl.classList.add('bust');
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    scoreEl.classList.remove('bust');
+  }, 800);
+}
+
+function addHistoryEntry(round, score, busted) {
+  const list = document.getElementById('history-list');
+  const chip = document.createElement('div');
+  chip.className = 'history-entry';
+  chip.id = 'hist-' + round;
+  const color = busted ? 'var(--danger)' : score >= 100 ? 'var(--accent)' : score >= 60 ? 'var(--success)' : 'var(--text)';
+  chip.innerHTML = `R${round}<span style="color:${color}">${busted ? 'BUST' : score}</span>`;
+  list.appendChild(chip);
+  list.scrollLeft = list.scrollWidth;
+}
+
+function removeLastHistoryEntry() {
+  const list = document.getElementById('history-list');
+  const last = list.lastElementChild;
+  if (last) last.remove();
+}
+
+// ════════════════════════════════════════════
+//  WIN PAGE
+// ════════════════════════════════════════════
+function showWin(winner = 'human') {
+  const gs = gameState;
+  const isMulti = gameConfig.playerMode !== 'solo';
+  const rounds = gs.round;
+  const darts = gs.totalDarts;
+  const avg = rounds > 0 ? Math.round((gs.startPoints / rounds) * 10) / 10 : 0;
+
+  document.getElementById('ws-rounds').textContent = rounds;
+  document.getElementById('ws-darts').textContent = darts;
+  document.getElementById('ws-avg').textContent = avg.toFixed(1);
+  document.getElementById('ws-best').textContent = gs.highestRound;
+
+  let title = 'SPIEL GEWONNEN!';
+  let sub = '';
+  if (isMulti) {
+    const p1Name = gameConfig.player1Name || 'Spieler 1';
+    const p2Name = gameConfig.playerMode === 'cpu' ? 'KI' : (gameConfig.player2Name || 'Spieler 2');
+    if (winner === 'human') {
+      title = p1Name.toUpperCase() + ' GEWINNT!';
+      sub = gameConfig.playerMode === 'cpu' ? 'KI besiegt! Gut gespielt! 🎯' : p2Name + ' verliert!';
+    } else {
+      title = p2Name.toUpperCase() + ' GEWINNT!';
+      sub = gameConfig.playerMode === 'cpu' ? 'Nächstes Mal klappt es!' : p1Name + ' verliert!';
+    }
+  } else {
+    const subTexts = ['Perfekter Abschluss! 🎯', 'Stark gespielt!', 'Gut gemacht!', 'Weiter so!'];
+    sub = darts <= 9 ? subTexts[0] : darts <= 18 ? subTexts[1] : darts <= 27 ? subTexts[2] : subTexts[3];
+  }
+
+  document.querySelector('.win-title').textContent = title;
+  document.getElementById('win-sub').textContent = sub;
+
+  showPage('win');
+  startCountdown();
+}
+
+function startCountdown() {
+  let n = 5;
+  const numEl = document.getElementById('countdown-num');
+  const circle = document.getElementById('countdown-circle');
+  const circumference = 150.8;
+
+  numEl.textContent = n;
+  circle.style.transition = 'none';
+  circle.style.strokeDashoffset = 0;
+  // Force reflow
+  void circle.getBoundingClientRect();
+  circle.style.transition = 'stroke-dashoffset 1s linear';
+
+  const interval = setInterval(() => {
+    n--;
+    numEl.textContent = n;
+    // offset goes from 0 (full) to circumference (empty) as n goes 5→0
+    circle.style.strokeDashoffset = circumference * ((5 - n) / 5);
+    if (n <= 0) {
+      clearInterval(interval);
+      setTimeout(() => showPage('start'), 1000);
+    }
+  }, 1000);
+}
+
+function announceWin(winner = 'human') {
+  if (!settings.speech) return;
+  if (winner === 'human') speak('Glückwunsch! Du hast gewonnen!');
+  else speak(gameConfig.playerMode === 'cpu' ? 'Die KI hat gewonnen!' : 'Spieler zwei hat gewonnen!');
+}
+
+// ════════════════════════════════════════════
+//  SPEECH
+// ════════════════════════════════════════════
+function speak(text) {
+  if (!settings.speech || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'de-DE';
+  utter.volume = settings.volume;
+  utter.rate = 1.05;
+  window.speechSynthesis.speak(utter);
+}
+
+function speakRound(scored, remaining) {
+  let msg = '';
+  if (scored === 0) {
+    msg = 'Null Punkte. Rest ' + remaining;
+  } else {
+    msg = scored + ' Punkte. Rest ' + remaining;
+    if (remaining <= 50 && remaining > 0) {
+      const checkout = getCheckoutHint(remaining);
+      if (checkout) msg += '. Checkout ' + checkout;
+    }
+  }
+  speak(msg);
+}
+
+function getCheckoutHint(n) {
+  const checkouts = {
+    2: 'Double 1', 4: 'Double 2', 6: 'Double 3', 8: 'Double 4',
+    10: 'Double 5', 12: 'Double 6', 14: 'Double 7', 16: 'Double 8',
+    18: 'Double 9', 20: 'Double 10', 22: 'Double 11', 24: 'Double 12',
+    26: 'Double 13', 28: 'Double 14', 30: 'Double 15', 32: 'Double 16',
+    50: 'Bull', 40: 'Double 20', 36: 'Double 18',
+  };
+  if (gameConfig.outRule === 'single') return null;
+  return checkouts[n] || null;
+}
+
+// ════════════════════════════════════════════
+//  INPUT MODE
+// ════════════════════════════════════════════
+function setInputMode(mode) {
+  gameState.inputMode = mode;
+  gameConfig.inputMode = mode;
+  // Toggle keypads (mode buttons no longer exist in-game)
+  const dartKp = document.getElementById('dart-keypad');
+  const sumKp  = document.getElementById('sum-keypad');
+  if (dartKp) dartKp.style.display = mode === 'dart' ? 'flex' : 'none';
+  if (sumKp)  sumKp.classList.toggle('active', mode === 'sum');
+  if (mode === 'sum') sumClear();
+}
+
+// ════════════════════════════════════════════
+//  SUM KEYPAD LOGIC
+// ════════════════════════════════════════════
+function sumDigit(d) {
+  haptic(8);
+  const gs = gameState;
+  if (gs.sumInputStr.length >= 3) return;
+  gs.sumInputStr += d.toString();
+  sumUpdateDisplay();
+}
+
+function sumDel() {
+  haptic(8);
+  gameState.sumInputStr = gameState.sumInputStr.slice(0, -1);
+  sumUpdateDisplay();
+}
+
+function sumClear() {
+  gameState.sumInputStr = '';
+  sumUpdateDisplay();
+}
+
+function sumQuick(val) {
+  haptic(8);
+  gameState.sumInputStr = val.toString();
+  sumUpdateDisplay();
+}
+
+function sumUpdateDisplay() {
+  const gs = gameState;
+  const el = document.getElementById('sum-display-val');
+  const hint = document.getElementById('sum-display-hint');
+  const label = document.getElementById('sum-mode-label');
+  label.textContent = 'PUNKTE EINGEBEN';
+  if (!gs.sumInputStr) {
+    el.className = 'sum-display-val empty';
+    el.textContent = '—';
+    hint.textContent = '3 Darts / max. 180';
+    hint.innerHTML = '3 Darts<br>max. 180';
+    return;
+  }
+  const n = parseInt(gs.sumInputStr);
+  const valid = isValidScore(n) && n <= gs.remaining;
+  el.className = 'sum-display-val' + (valid ? '' : ' invalid');
+  el.textContent = n;
+  if (!isValidScore(n)) {
+    hint.innerHTML = '<span style="color:var(--danger)">Ungültig!</span>';
+  } else if (n > gs.remaining) {
+    hint.innerHTML = '<span style="color:var(--danger)">Zu hoch!</span>';
+  } else {
+    const newRem = gs.remaining - n;
+    hint.innerHTML = 'Rest: <strong style="color:var(--accent)">' + newRem + '</strong>';
+  }
+}
+
+// "Punkte" button — scored n, rest = current - n
+function sumCommitScore() {
+  haptic(10);
+  const gs = gameState;
+  if (!gs.sumInputStr) return;
+  const n = parseInt(gs.sumInputStr);
+  if (!isValidScore(n)) { sumShakeDisplay(); return; }
+  if (n > gs.remaining) { sumShakeDisplay(); return; }
+  const newRem = gs.remaining - n;
+  sumProcessRound(n, newRem);
+}
+
+// "Rest" button — player gave rest value, scored = current - rest
+function sumCommitRest() {
+  haptic(10);
+  const gs = gameState;
+  if (!gs.sumInputStr) return;
+  const n = parseInt(gs.sumInputStr);
+  if (n < 0 || n >= gs.remaining) { sumShakeDisplay(); return; }
+  const scored = gs.remaining - n;
+  if (!isValidScore(scored)) { sumShakeDisplay(); return; }
+  sumProcessRound(scored, n);
+}
+
+function sumShakeDisplay() {
+  const el = document.getElementById('sum-display-val');
+  el.style.animation = 'bust-shake 0.4s ease';
+  setTimeout(() => el.style.animation = '', 450);
+}
+
+function sumProcessRound(scored, newRemaining) {
+  const gs = gameState;
+
+  // Check bust conditions
+  let busted = false;
+  if (newRemaining < 0 || newRemaining === 1) busted = true;
+  if (newRemaining === 0 && gameConfig.outRule === 'double') {
+    // In sum mode we need to ask about checkout dart anyway — treat as potentially valid
+    // Can't validate double-out without knowing which dart — we ask
+  }
+
+  if (busted) {
+    sumClear();
+    showBust();
+    // Ask which dart busted
+    setTimeout(() => showBustDartModal(scored), 850);
+    return;
+  }
+
+  if (newRemaining === 0) {
+    // Win — ask checkout dart
+    gs.sumPendingScore = { scored, newRemaining };
+    sumClear();
+    showCheckoutModal();
+    return;
+  }
+
+  // Normal round
+  gs.remaining = newRemaining;
+  gs.totalDarts += 3;
+  gs.throwsThisRound = [{ scored, field: scored, mod: 'sum', busted: false }];
+  sumClear();
+  updateScoreDisplay(true);
+  updateStats();
+  endRoundSum(false, scored, 3);
+}
+
+function showCheckoutModal() {
+  document.getElementById('checkout-modal').classList.add('show');
+}
+
+function showBustDartModal(scored) {
+  gameState._bustScoredBeforeModal = scored;
+  document.getElementById('bust-dart-modal').classList.add('show');
+}
+
+function confirmCheckoutDart(dartNum) {
+  document.getElementById('checkout-modal').classList.remove('show');
+  const gs = gameState;
+  const { scored, newRemaining } = gs.sumPendingScore;
+  gs.remaining = newRemaining;
+  gs.totalDarts += dartNum;
+  gs.throwsThisRound = [{ scored, field: scored, mod: 'sum', busted: false }];
+  gs.sumPendingScore = null;
+  updateScoreDisplay(true);
+  endRoundSum(false, scored, dartNum, true);
+}
+
+function confirmBustDart(dartNum) {
+  document.getElementById('bust-dart-modal').classList.remove('show');
+  const gs = gameState;
+  gs.totalDarts += dartNum;
+  // Restore remaining (bust = no score)
+  gs.throwsThisRound = [{ scored: 0, field: 0, mod: 'sum', busted: true }];
+  gs.sumPendingScore = null;
+  delete gs._bustScoredBeforeModal;
+  updateScoreDisplay();
+  endRoundSum(true, 0, dartNum);
+}
+
+function endRoundSum(busted, actualScore, dartCount, won = false) {
+  const gs = gameState;
+
+  if (actualScore > gs.highestRound && !busted) gs.highestRound = actualScore;
+
+  gs.history.push({
+    round: gs.round,
+    throws: [actualScore],
+    total: busted ? 0 : actualScore,
+    remainAfter: gs.remaining,
+    dartCount,
+  });
+
+  addHistoryEntry(gs.round, busted ? 0 : actualScore, busted);
+
+  if (won) {
+    const winner = (gameConfig.playerMode !== 'solo' && gs.currentTurn === 'opponent') ? 'opponent' : 'human';
+    announceWin(winner);
+    setTimeout(() => showWin(winner), 800);
+    return;
+  }
+
+  if (settings.speech && !busted) speakRound(actualScore, gs.remaining);
+  else if (settings.speech && busted) speak('Bust!');
+
+  // Multiplayer
+  if (gameConfig.playerMode !== 'solo') {
+    if (gs.currentTurn === 'human') {
+      gs.humanRemaining = gs.remaining;
+      updateDualScores();
+      gs.currentTurn = 'opponent';
+      gs.round++;
+      gs.dartInRound = 0;
+      gs.throwsThisRound = [];
+      updateRoundScores();
+      updateDarts();
+      updateStats();
+      switchToOpponent();
+      return;
+    } else {
+      gs.opponentRemaining = gs.remaining;
+      updateDualScores();
+      gs.currentTurn = 'human';
+      gs.remaining = gs.humanRemaining;
+      gs.round++;
+      gs.dartInRound = 0;
+      gs.throwsThisRound = [];
+      updateScoreDisplay();
+      updateRoundScores();
+      updateDarts();
+      updateStats();
+      updateTurnIndicator();
+      return;
+    }
+  }
+
+  gs.round++;
+  gs.dartInRound = 0;
+  gs.throwsThisRound = [];
+  updateRoundScores();
+  updateDarts();
+  updateStats();
+}
+
+// ════════════════════════════════════════════
+//  SPEECH INPUT ENGINE
+// ════════════════════════════════════════════
+let speechRecognition = null;
+let micActive = false;
+
+function initSpeech() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('speech-unsupported').style.display = 'block';
+    document.getElementById('mic-btn').style.display = 'none';
+    return;
+  }
+  speechRecognition = new SpeechRecognition();
+  speechRecognition.lang = 'de-DE';
+  speechRecognition.continuous = false;
+  speechRecognition.interimResults = true;
+  speechRecognition.maxAlternatives = 3;
+
+  speechRecognition.onstart = () => {
+    const dot = document.getElementById('speech-dot');
+    if (dot) { dot.classList.remove('idle'); }
+    document.getElementById('speech-transcript').textContent = 'Höre zu…';
+  };
+
+  speechRecognition.onresult = (e) => {
+    let interim = '';
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    document.getElementById('speech-transcript').textContent = (final || interim).trim();
+    if (final) processSpeechInput(final.trim().toLowerCase());
+  };
+
+  speechRecognition.onerror = (e) => {
+    if (e.error === 'no-speech' || e.error === 'aborted') {
+      if (micActive && !gameState.micMuted) restartSpeech();
+      return;
+    }
+    document.getElementById('speech-transcript').textContent = 'Fehler: ' + e.error;
+  };
+
+  speechRecognition.onend = () => {
+    if (micActive && !gameState.micMuted) {
+      setTimeout(() => restartSpeech(), 300);
+    } else {
+      const dot = document.getElementById('speech-dot');
+      if (dot) dot.classList.add('idle');
+    }
+  };
+}
+
+function restartSpeech() {
+  try { speechRecognition.start(); } catch(e) {}
+}
+
+function toggleMic() {
+  if (!speechRecognition) { initSpeech(); }
+  if (!speechRecognition) return;
+  micActive = !micActive;
+  gameState.micMuted = !micActive;
+  const btn = document.getElementById('mic-btn');
+  const status = document.getElementById('speech-status');
+  if (micActive) {
+    btn.classList.remove('muted');
+    btn.classList.add('listening');
+    status.classList.add('active');
+    restartSpeech();
+  } else {
+    btn.classList.remove('listening');
+    btn.classList.add('muted');
+    status.classList.remove('active');
+    try { speechRecognition.abort(); } catch(e) {}
+    document.getElementById('speech-dot').classList.add('idle');
+  }
+}
+
+// ── SPEECH PARSER ──
+function processSpeechInput(text) {
+  if (gameState.inputMode === 'sum') {
+    parseSumSpeech(text);
+  } else {
+    parseDartSpeech(text);
+  }
+}
+
+// Normalise spoken German numbers to int
+function parseSpokenNumber(s) {
+  const map = {
+    'null':0,'eins':1,'ein':1,'zwei':2,'drei':3,'vier':4,'fünf':5,
+    'sechs':6,'sieben':7,'acht':8,'neun':9,'zehn':10,'elf':11,
+    'zwölf':12,'dreizehn':13,'vierzehn':14,'fünfzehn':15,'sechzehn':16,
+    'siebzehn':17,'achtzehn':18,'neunzehn':19,'zwanzig':20,
+    'einundzwanzig':21,'zweiundzwanzig':22,'dreiundzwanzig':23,
+    'vierundzwanzig':24,'fünfundzwanzig':25,'sechsundzwanzig':26,
+    'siebenundzwanzig':27,'achtundzwanzig':28,'neunundzwanzig':29,
+    'dreißig':30,'vierzig':40,'fünfzig':50,'sechzig':60,'siebzig':70,
+    'achtzig':80,'neunzig':90,'hundert':100,'hundertachtzig':180,
+  };
+  s = s.trim().replace(/\s+/g,'');
+  if (map[s] !== undefined) return map[s];
+  const n = parseInt(s);
+  return isNaN(n) ? null : n;
+}
+
+// Extract a dart throw from a token: "t20", "triple20", "dreifach20", "d16", "double16", "doppel16", "s5", "single5", "5", "bull", "miss", "daneben"
+function parseDartToken(token) {
+  token = token.replace(/\s+/g,'').toLowerCase();
+
+  if (token === 'bull' || token === 'bullseye') return { scored: 50, field: 'Bull', mod: 'double' };
+  if (token === 'bull25' || token === 'singlebull') return { scored: 25, field: 'Bull', mod: 'single' };
+  if (token === 'miss' || token === 'daneben' || token === 'vorbei') return { scored: 0, field: 0, mod: 'miss' };
+
+  // Triple
+  let m = token.match(/^(?:t|triple|dreifach|3x|3×)(\d{1,2})$/);
+  if (m) { const n = parseInt(m[1]); if (n >= 1 && n <= 20) return { scored: n*3, field: n, mod: 'triple' }; }
+
+  // Double
+  m = token.match(/^(?:d|double|doppel|2x|2×)(\d{1,2})$/);
+  if (m) { const n = parseInt(m[1]); if (n >= 1 && n <= 20) return { scored: n*2, field: n, mod: 'double' }; }
+  // Double bull
+  if (token === 'doublebull' || token === 'doppelbull' || token === 'dbull') return { scored: 50, field: 'Bull', mod: 'double' };
+
+  // Single (explicit or bare number)
+  m = token.match(/^(?:s|single|einfach|1x|1×)?(\d{1,2})$/);
+  if (m) { const n = parseInt(m[1]); if (n >= 1 && n <= 20) return { scored: n, field: n, mod: 'single' }; }
+
+  return null;
+}
+
+function parseDartSpeech(text) {
+  // Normalize: replace commas/und with space
+  text = text.replace(/[,;]/g,' ').replace(/und/g,' ');
+
+  // Try to parse up to 3 dart tokens separated by spaces
+  const tokens = text.trim().split(/\s+/);
+  const darts = [];
+
+  for (const tok of tokens) {
+    const d = parseDartToken(tok);
+    if (d) darts.push(d);
+    if (darts.length === 3) break;
+  }
+
+  // Also try parsing spoken number combos: "triple zwanzig double sechzehn fünf"
+  if (darts.length === 0) {
+    // Try multi-word patterns
+    const multiMatch = parseMultiWordDarts(text);
+    if (multiMatch.length > 0) darts.push(...multiMatch);
+  }
+
+  if (darts.length === 0) {
+    document.getElementById('speech-transcript').textContent = '❓ Nicht erkannt: ' + text;
+    return;
+  }
+
+  // Apply darts one by one
+  for (const d of darts) {
+    if (gameState.dartInRound >= 3) break;
+    processThrow(d.scored, d.field, d.mod);
+    // small spoken feedback
+    if (settings.speech) {
+      const lbl = d.mod === 'triple' ? 'Triple ' + d.field
+                : d.mod === 'double' ? 'Double ' + d.field
+                : d.scored === 0 ? 'Miss'
+                : d.field === 'Bull' ? 'Bull'
+                : d.field.toString();
+      // Only speak single dart if fewer than 3 given
+      if (darts.length < 3) speak(lbl + ', ' + gameState.remaining + ' Rest');
+    }
+  }
+}
+
+function parseMultiWordDarts(text) {
+  const darts = [];
+  // Patterns: (triple|dreifach|double|doppel|single|einfach)? <number>
+  const re = /(?:(triple|dreifach|3x|double|doppel|2x|single|einfach|1x|s|d|t)\s+)?(\d{1,2}|zwanzig|neunzehn|achtzehn|siebzehn|sechzehn|fünfzehn|vierzehn|dreizehn|zwölf|elf|zehn|neun|acht|sieben|sechs|fünf|vier|drei|zwei|eins|null|bull|miss|daneben)/gi;
+  let m;
+  while ((m = re.exec(text)) !== null && darts.length < 3) {
+    const modStr = (m[1] || '').toLowerCase();
+    const numStr = m[2].toLowerCase();
+    if (numStr === 'bull') { darts.push({ scored: 50, field: 'Bull', mod: 'double' }); continue; }
+    if (numStr === 'miss' || numStr === 'daneben') { darts.push({ scored: 0, field: 0, mod: 'miss' }); continue; }
+    const n = parseSpokenNumber(numStr);
+    if (n === null || n < 1 || n > 20) continue;
+    let mod = 'single';
+    if (/triple|dreifach|3x/.test(modStr)) mod = 'triple';
+    else if (/double|doppel|2x/.test(modStr)) mod = 'double';
+    const multiplier = mod === 'triple' ? 3 : mod === 'double' ? 2 : 1;
+    darts.push({ scored: n * multiplier, field: n, mod });
+  }
+  return darts;
+}
+
+function parseSumSpeech(text) {
+  // Patterns:
+  // "60 Punkte" / "sechzig" → scored 60
+  // "Rest 120" / "120 Rest" / "hundertundzwanzig Rest" → rest = 120
+
+  text = text.replace(/[,;]/g,' ').trim();
+
+  // Check for "rest" keyword
+  const restMatch = text.match(/(?:rest\s+(\d+)|(\d+)\s+rest|(\d+)\s+übrig|übrig\s+(\d+))/i);
+  if (restMatch) {
+    const val = parseInt(restMatch[1] || restMatch[2] || restMatch[3] || restMatch[4]);
+    if (!isNaN(val)) {
+      gameState.sumInputStr = val.toString();
+      sumUpdateDisplay();
+      sumCommitRest();
+      return;
+    }
+  }
+
+  // Plain number or "X Punkte"
+  const scoreMatch = text.match(/(\d+)(?:\s*punkte?)?/i);
+  if (scoreMatch) {
+    const val = parseInt(scoreMatch[1]);
+    if (!isNaN(val)) {
+      gameState.sumInputStr = val.toString();
+      sumUpdateDisplay();
+      sumCommitScore();
+      return;
+    }
+  }
+
+  // Spoken German number
+  const tokens = text.replace(/\s*punkte?\s*/i,'').replace(/\s*rest\s*/i,'').trim().split(/\s+/);
+  for (const tok of tokens) {
+    const n = parseSpokenNumber(tok);
+    if (n !== null) {
+      gameState.sumInputStr = n.toString();
+      sumUpdateDisplay();
+      if (/rest|übrig/i.test(text)) sumCommitRest();
+      else sumCommitScore();
+      return;
+    }
+  }
+
+  document.getElementById('speech-transcript').textContent = '❓ Nicht erkannt: ' + text;
+}
+
+// ════════════════════════════════════════════
+//  MULTIPLAYER HELPERS
+// ════════════════════════════════════════════
+
+function updateTurnIndicator() {
+  const gs = gameState;
+  const isHuman = gs.currentTurn === 'human';
+  const p1Name = gameConfig.player1Name || 'Spieler 1';
+  const p2Name = gameConfig.playerMode === 'cpu'
+    ? 'KI'
+    : (gameConfig.player2Name || 'Spieler 2');
+  const activeName = isHuman ? p1Name : p2Name;
+  document.getElementById('turn-player-name').textContent = activeName;
+
+  // Update mcard highlights
+  const mc1 = document.getElementById('mcard-human');
+  const mc2 = document.getElementById('mcard-opp');
+  if (mc1 && mc2) {
+    if (isHuman) {
+      mc1.style.border = '1px solid var(--accent)';
+      mc1.style.background = 'rgba(232,200,74,0.06)';
+      document.getElementById('mcard-p1-score').style.color = 'var(--accent)';
+      mc2.style.border = '1px solid var(--border)';
+      mc2.style.background = 'transparent';
+      document.getElementById('mcard-p2-score').style.color = 'var(--muted)';
+    } else {
+      mc2.style.border = gameConfig.playerMode === 'cpu' ? '1px solid var(--accent2)' : '1px solid var(--accent)';
+      mc2.style.background = gameConfig.playerMode === 'cpu' ? 'rgba(74,159,232,0.06)' : 'rgba(232,200,74,0.06)';
+      document.getElementById('mcard-p2-score').style.color = gameConfig.playerMode === 'cpu' ? 'var(--accent2)' : 'var(--accent)';
+      mc1.style.border = '1px solid var(--border)';
+      mc1.style.background = 'transparent';
+      document.getElementById('mcard-p1-score').style.color = 'var(--muted)';
+    }
+    document.getElementById('mcard-p1-sub').textContent = isHuman ? 'Am Zug' : 'Wartet';
+    document.getElementById('mcard-p2-sub').textContent = !isHuman ? 'Am Zug' : 'Wartet';
+  }
+}
+
+function updateDualScores() {
+  const gs = gameState;
+  const p1El = document.getElementById('mcard-p1-score');
+  const p2El = document.getElementById('mcard-p2-score');
+  if (p1El) p1El.textContent = gs.humanRemaining;
+  if (p2El) p2El.textContent = gs.opponentRemaining;
+  // Also keep old elements in sync (for finishAiTurn)
+  const old1 = document.getElementById('ps-human');
+  const old2 = document.getElementById('ps-opponent');
+  if (old1) old1.textContent = gs.humanRemaining;
+  if (old2) old2.textContent = gs.opponentRemaining;
+}
+
+function switchToOpponent() {
+  const gs = gameState;
+  updateTurnIndicator();
+  if (gameConfig.playerMode === 'cpu') {
+    // Wait for speech to finish before AI throws
+    function startAi() { setTimeout(() => runAiTurn(), 400); }
+    if (settings.speech && window.speechSynthesis && window.speechSynthesis.speaking) {
+      const checkDone = setInterval(() => {
+        if (!window.speechSynthesis.speaking) {
+          clearInterval(checkDone);
+          startAi();
+        }
+      }, 100);
+      // Fallback: max 4s wait
+      setTimeout(() => { clearInterval(checkDone); if (!gameState.winner) startAi(); }, 4000);
+    } else {
+      startAi();
+    }
+  } else {
+    // PvP: just switch display, human enters for player 2
+    gs.remaining = gs.opponentRemaining;
+    updateScoreDisplay();
+    updateDarts();
+  }
+}
+
+// ════════════════════════════════════════════
+//  AI ENGINE
+// ════════════════════════════════════════════
+
+/**
+ * AI throw profiles per difficulty.
+ * Each difficulty defines:
+ *   - accuracy: probability of hitting the intended segment
+ *   - preferredTargets: weighted field preferences
+ *   - doubleAccuracy: probability of hitting double for checkout
+ *   - bustRate: extra probability of busting near checkout
+ */
+const AI_PROFILES = {
+  easy: {
+    // Leicht: Ø ~35 Punkte pro Runde (Anfänger)
+    singleProb: 0.60,   // prob single (vs double/triple)
+    doubleProb: 0.15,
+    tripleProb: 0.05,
+    missProb: 0.20,      // complete miss
+    preferredFields: [5,1,12,9,14,11,8,16,7,19], // common beginner misses
+    doubleCheckoutAccuracy: 0.12,
+    maxSingleTarget: 14,
+  },
+  medium: {
+    // Mittel: Ø ~55 Punkte pro Runde (Hobbyspieler)
+    singleProb: 0.55,
+    doubleProb: 0.20,
+    tripleProb: 0.12,
+    missProb: 0.13,
+    preferredFields: [20,19,18,17,16,15,14,13,12,11],
+    doubleCheckoutAccuracy: 0.28,
+    maxSingleTarget: 20,
+  },
+  hard: {
+    // Schwer: Ø ~80 Punkte pro Runde (Fortgeschrittener)
+    singleProb: 0.35,
+    doubleProb: 0.22,
+    tripleProb: 0.35,
+    missProb: 0.08,
+    preferredFields: [20,19,18,17,16,15],
+    doubleCheckoutAccuracy: 0.48,
+    maxSingleTarget: 20,
+  },
+};
+
+// Standard checkout table (best single path to finish)
+const CHECKOUT_TABLE = {
+  170:[['T20','T20','Bull']],  160:[['T20','T20','D20']], 161:[['T17','T18','D20']],
+  164:[['T20','T18','D20']], 167:[['T20','T19','D20']], 168:[['T20','T20','D14']],
+  100:[['T20','D20']],  99:[['T19','D21']],  98:[['T20','D19']],
+  97:[['T19','D20']], 96:[['T20','D18']], 95:[['T19','D19']], 94:[['T18','D20']],
+  93:[['T19','D18']], 92:[['T20','D16']], 91:[['T17','D20']], 90:[['T18','D18']],
+  89:[['T19','D16']], 88:[['T20','D14']], 87:[['T17','D18']], 86:[['T18','D16']],
+  85:[['T15','D20']], 84:[['T20','D12']], 83:[['T17','D16']], 82:[['T14','D20']],
+  81:[['T19','D12']], 80:[['T20','D10']], 79:[['T13','D20']], 78:[['T18','D12']],
+  77:[['T19','D10']], 76:[['T20','D8']],  75:[['T17','D12']], 74:[['T14','D16']],
+  73:[['T19','D8']],  72:[['T16','D12']], 71:[['T13','D16']], 70:[['T10','D20']],
+  69:[['T19','D6']],  68:[['T20','D4']],  67:[['T17','D8']],  66:[['T10','D18']],
+  65:[['T19','D4']],  64:[['T16','D8']],  63:[['T13','D12']], 62:[['T10','D16']],
+  61:[['T15','D8']],  60:[['20','D20']],  59:[['19','D20']], 58:[['18','D20']],
+  57:[['17','D20']], 56:[['16','D20']], 55:[['15','D20']], 54:[['14','D20']],
+  53:[['13','D20']], 52:[['12','D20']], 51:[['11','D20']], 50:[['Bull']],
+  49:[['9','D20']],  48:[['8','D20']],   47:[['7','D20']],  46:[['6','D20']],
+  45:[['5','D20']],  44:[['4','D20']],   43:[['3','D20']],  42:[['10','D16']],
+  41:[['9','D16']],  40:[['D20']],       39:[['7','D16']],  38:[['D19']],
+  37:[['5','D16']],  36:[['D18']],       35:[['3','D16']],  34:[['D17']],
+  33:[['1','D16']],  32:[['D16']],       31:[['7','D12']],  30:[['D15']],
+  29:[['5','D12']],  28:[['D14']],       27:[['3','D12']],  26:[['D13']],
+  25:[['5','D10']],  24:[['D12']],       23:[['7','D8']],   22:[['D11']],
+  21:[['5','D8']],   20:[['D10']],       19:[['3','D8']],   18:[['D9']],
+  17:[['1','D8']],   16:[['D8']],        15:[['7','D4']],   14:[['D7']],
+  13:[['5','D4']],   12:[['D6']],        11:[['3','D4']],   10:[['D5']],
+  9:[['1','D4']],    8:[['D4']],         7:[['3','D2']],    6:[['D3']],
+  5:[['1','D2']],    4:[['D2']],         3:[['1','D1']],    2:[['D1']],
+};
+
+function rnd() { return Math.random(); }
+function pick(arr) { return arr[Math.floor(rnd() * arr.length)]; }
+function gauss(mean, sd) {
+  // Box-Muller
+  let u = 0, v = 0;
+  while(u === 0) u = rnd();
+  while(v === 0) v = rnd();
+  return mean + sd * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+function aiSingleThrow(remaining, profile, isLastDart) {
+  // Returns { scored, label, mod }
+  const r = rnd();
+
+  // Near checkout?
+  if (remaining <= 170 && CHECKOUT_TABLE[remaining]) {
+    const checkout = CHECKOUT_TABLE[remaining][0];
+    const targetStr = checkout[0]; // e.g. "T20", "D16", "Bull"
+    return aiAttemptCheckout(targetStr, remaining, profile, isLastDart, checkout.length);
+  }
+
+  // Go for big scores
+  if (r < profile.missProb) {
+    return { scored: 0, label: 'MISS', mod: 'miss' };
+  }
+
+  const fields = profile.preferredFields;
+  const field = pick(fields);
+
+  const r2 = rnd();
+  if (r2 < profile.tripleProb) {
+    // Attempt triple
+    const hit = rnd() < 0.55; // 55% chance of actually hitting triple
+    if (hit) return { scored: field * 3, label: field.toString(), mod: 'triple' };
+    // Miss triple → single or adjacent
+    return { scored: field, label: field.toString(), mod: 'single' };
+  } else if (r2 < profile.tripleProb + profile.doubleProb) {
+    const hit = rnd() < 0.45;
+    if (hit) return { scored: field * 2, label: field.toString(), mod: 'double' };
+    return { scored: field, label: field.toString(), mod: 'single' };
+  } else {
+    // Single — add some noise
+    const actualField = rnd() < 0.75 ? field : pick([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+    return { scored: actualField, label: actualField.toString(), mod: 'single' };
+  }
+}
+
+function aiAttemptCheckout(targetStr, remaining, profile, isLast, checkoutLength) {
+  const isDouble = targetStr.startsWith('D');
+  const isTriple = targetStr.startsWith('T');
+  const isBull = targetStr === 'Bull';
+
+  if (isBull) {
+    const hit = rnd() < profile.doubleCheckoutAccuracy;
+    if (hit) return { scored: 50, label: 'Bull', mod: 'double' };
+    // Miss Bull → 25 or 1
+    const alt = rnd() < 0.6 ? 25 : pick([1,5,20]);
+    return { scored: alt, label: alt === 25 ? 'Bull' : alt.toString(), mod: alt === 25 ? 'single' : 'single' };
+  }
+
+  const num = parseInt(targetStr.replace(/[DT]/, ''));
+
+  if (isDouble) {
+    if (!isLast || checkoutLength > 1) {
+      // Not the finishing dart — just hit it accurately
+      const hit = rnd() < 0.58;
+      if (hit) return { scored: num * 2, label: num.toString(), mod: 'double' };
+      return { scored: num, label: num.toString(), mod: 'single' };
+    }
+    // Finishing on double
+    const hit = rnd() < profile.doubleCheckoutAccuracy;
+    if (hit) return { scored: num * 2, label: num.toString(), mod: 'double' };
+    // Miss: single or miss entirely
+    if (rnd() < 0.5) return { scored: num, label: num.toString(), mod: 'single' }; // bust if remaining===num*2
+    return { scored: 0, label: 'MISS', mod: 'miss' };
+  }
+
+  if (isTriple) {
+    const hit = rnd() < (profile.tripleProb + 0.3);
+    if (hit) return { scored: num * 3, label: num.toString(), mod: 'triple' };
+    return { scored: num, label: num.toString(), mod: 'single' };
+  }
+
+  // Single target
+  const hit = rnd() < 0.78;
+  if (hit) return { scored: num, label: num.toString(), mod: 'single' };
+  return { scored: Math.max(1, num + (rnd() < 0.5 ? 1 : -1)), label: num.toString(), mod: 'single' };
+}
+
+function runAiTurn() {
+  const gs = gameState;
+  const profile = AI_PROFILES[gameConfig.difficulty];
+
+  // Show AI overlay
+  const overlay = document.getElementById('ai-overlay');
+  overlay.classList.add('show');
+  document.getElementById('ai-overlay-title').textContent = 'KI wirft…';
+
+  // Reset AI dart boxes
+  [1,2,3].forEach(i => {
+    const box = document.getElementById('ai-dbox-' + i);
+    const val = document.getElementById('ai-dbox-val-' + i);
+    box.className = 'ai-dart-box';
+    val.textContent = '—';
+  });
+  document.getElementById('ai-round-score').textContent = '—';
+  document.getElementById('ai-remaining-display').textContent = gs.opponentRemaining;
+
+  let aiRemaining = gs.opponentRemaining;
+  const throws = [];
+  let busted = false;
+
+  // Simulate 3 throws
+  function doThrow(idx) {
+    if (idx >= 3) {
+      // Done — calculate
+      finishAiTurn(throws, busted, aiRemaining);
+      return;
+    }
+
+    const isLast = idx === 2;
+    const t = aiSingleThrow(aiRemaining, profile, isLast);
+    const newRem = aiRemaining - t.scored;
+
+    // Bust check
+    let isBust = false;
+    if (newRem < 0 || newRem === 1) isBust = true;
+    if (newRem === 0 && gameConfig.outRule === 'double' && t.mod !== 'double' && !(t.label === 'Bull' && t.mod === 'double')) isBust = true;
+
+    throws.push({ ...t, busted: isBust });
+
+    // Show in overlay
+    const box = document.getElementById('ai-dbox-' + (idx+1));
+    const val = document.getElementById('ai-dbox-val-' + (idx+1));
+    // Build field label: D16, T20, BULL, MISS, or plain number
+    function fieldLabel(throw_) {
+      if (throw_.scored === 0) return 'MISS';
+      if (throw_.label === 'Bull') return throw_.mod === 'double' ? 'BULL 50' : 'Bull 25';
+      if (throw_.mod === 'double') return 'D' + throw_.label + '<br><small style="font-size:0.65rem;color:var(--accent2)">' + throw_.scored + '</small>';
+      if (throw_.mod === 'triple') return 'T' + throw_.label + '<br><small style="font-size:0.65rem;color:var(--danger)">' + throw_.scored + '</small>';
+      return throw_.label;
+    }
+    if (isBust) {
+      box.classList.add('busted');
+      val.innerHTML = fieldLabel(t);
+    } else {
+      box.classList.add('filled');
+      val.innerHTML = fieldLabel(t);
+    }
+
+    if (isBust) {
+      busted = true;
+      document.getElementById('ai-overlay-title').textContent = 'BUST!';
+      setTimeout(() => finishAiTurn(throws, true, aiRemaining), 700);
+      return;
+    }
+
+    aiRemaining = newRem;
+    document.getElementById('ai-remaining-display').textContent = aiRemaining;
+
+    if (aiRemaining === 0) {
+      // Win!
+      throws.splice(idx + 1); // truncate remaining
+      finishAiTurn(throws, false, aiRemaining, true);
+      return;
+    }
+
+    setTimeout(() => doThrow(idx + 1), 550);
+  }
+
+  setTimeout(() => doThrow(0), 400);
+}
+
+function finishAiTurn(throws, busted, finalRemaining, won = false) {
+  const roundScore = busted ? 0 : throws.reduce((s,t) => s + (t.busted ? 0 : t.scored), 0);
+  document.getElementById('ai-round-score').textContent = busted ? 'BUST' : roundScore;
+  document.getElementById('ai-remaining-display').textContent = busted ? gameState.opponentRemaining : finalRemaining;
+
+  setTimeout(() => {
+    const overlay = document.getElementById('ai-overlay');
+    overlay.classList.remove('show');
+
+    const gs = gameState;
+    if (!busted) gs.opponentRemaining = finalRemaining;
+    document.getElementById('ps-opponent').textContent = gs.opponentRemaining;
+
+    gs.opponentHistory.push({ round: gs.round - 1, total: roundScore, remain: gs.opponentRemaining });
+
+    if (won) {
+      announceWin('opponent');
+      setTimeout(() => showWin('opponent'), 400);
+      return;
+    }
+
+    // Switch back to human
+    gs.currentTurn = 'human';
+    gs.remaining = gs.humanRemaining;
+    updateScoreDisplay();
+    updateDualScores();
+    updateTurnIndicator();
+    updateDarts();
+    updateStats();
+
+    if (settings.speech) {
+      speak(busted ? 'KI: Bust!' : 'KI: ' + roundScore + ' Punkte. Rest ' + gs.opponentRemaining);
+    }
+  }, 900);
+}
+
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
+function haptic(ms = 10) {
+  if (!settings.haptic) return;
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+function confirmQuit() {
+  document.getElementById('quit-modal').classList.add('show');
+}
+function doQuit() {
+  document.getElementById('quit-modal').classList.remove('show');
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  if (micActive) {
+    micActive = false;
+    try { speechRecognition && speechRecognition.abort(); } catch(e) {}
+    document.getElementById('mic-btn').classList.remove('listening');
+    document.getElementById('mic-btn').classList.add('muted');
+    document.getElementById('speech-status').classList.remove('active');
+  }
+  showPage('start');
+}
+function cancelQuit() {
+  document.getElementById('quit-modal').classList.remove('show');
+}
+
+// Apply persisted state to UI on load
+document.addEventListener('DOMContentLoaded', () => {
+  loadPersisted();
+  // Sync settings UI
+  const sp = document.getElementById('tgl-speech');
+  if (sp) sp.checked = settings.speech;
+  const hap = document.getElementById('tgl-haptic');
+  if (hap) hap.checked = settings.haptic;
+  const vol = document.getElementById('vol-slider');
+  if (vol) vol.value = settings.volume;
+  // Sync config UI (points, in/out/limit/playerMode/difficulty)
+  function syncGrp(id, val) {
+    const grp = document.getElementById(id);
+    if (!grp) return;
+    grp.querySelectorAll('.opt-btn').forEach(b => {
+      const bval = b.dataset.val;
+      b.classList.toggle('selected', bval == val || bval === String(val));
+    });
+  }
+  syncGrp('grp-points', gameConfig.points);
+  syncGrp('grp-in', gameConfig.inRule);
+  syncGrp('grp-out', gameConfig.outRule);
+  syncGrp('grp-limit', gameConfig.limit);
+  syncGrp('grp-playermode', gameConfig.playerMode);
+  syncGrp('grp-difficulty', gameConfig.difficulty);
+  syncGrp('grp-inputmode', gameConfig.inputMode || 'dart');
+  gameState.inputMode = gameConfig.inputMode || 'dart';
+  if (gameConfig.playerMode === 'cpu') {
+    document.getElementById('grp-difficulty-group').classList.add('visible');
+  }
+  if (gameConfig.playerMode === 'pvp') {
+    document.getElementById('input-p2-name').style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>
