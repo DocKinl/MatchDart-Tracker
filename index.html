@@ -3319,7 +3319,7 @@ function showConfirmModal(data) {
 
   modal.classList.add('show');
 
-  // Announce the score (commas = natural pause, no dots before numbers to avoid ordinal TTS)
+  // Announce only dart results — score+rest spoken AFTER confirmation
   if (!isSum) {
     const throwText = data.throws.map(t => {
       if (t.scored === 0) return 'daneben';
@@ -3328,10 +3328,9 @@ function showConfirmModal(data) {
       if (t.mod === 'double') return 'Doppel ' + t.field;
       return String(t.field);
     }).join(', ');
-    speak(throwText + ', gesamt ' + data.actualScore + ', Rest ' + data.newRemaining + ', bestätigen');
-  } else {
-    speak(data.actualScore + ' Punkte, Rest ' + data.newRemaining + ', bestätigen');
+    speak(throwText);
   }
+  // Sum mode: nothing to speak on open — user already knows what they entered
 }
 
 function confirmYes() {
@@ -3456,7 +3455,12 @@ function applyDartRound(d) {
     setTimeout(() => showWin(winner), 800);
     return;
   }
-  endRound(d.busted, d.won, true);
+  // Speak score + rest AFTER confirmation
+  if (d.busted) {
+    speak('Bust', () => endRound(d.busted, d.won, true));
+  } else {
+    speak(d.actualScore + ' Punkte, Rest ' + d.newRemaining, () => endRound(d.busted, d.won, true));
+  }
 }
 
 function applySumRound(d) {
@@ -3477,7 +3481,7 @@ function applySumRound(d) {
   }
   gs.totalDarts += 3;
   gs.throwsThisRound = [{ scored: d.actualScore, field: d.actualScore, mod: 'sum', busted: false }];
-  endRoundSum(false, d.actualScore, 3, false, true);
+  speak(d.actualScore + ' Punkte, Rest ' + d.newRemaining, () => endRoundSum(false, d.actualScore, 3, false, true));
 }
 
 // ── Speech input for confirmation modal ──
