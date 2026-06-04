@@ -1176,15 +1176,15 @@
     line-height: 1.3;
   }
 
-  /* Combined pad: digits left, quick-scores right */
+  /* Combined pad: digits left (3 cols), quick-scores right (2 cols) */
   .sum-pad-row {
     display: grid;
     grid-template-columns: 3fr 2fr;
-    gap: 0.4rem;
+    gap: 0.5rem;
     flex: 1;
   }
 
-  /* Digit grid: 3 cols */
+  /* Digit grid: 3 cols × 4 rows */
   .digit-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1204,13 +1204,13 @@
   }
   .digit-btn:active { background: var(--surface2); transform: scale(0.94); }
   .digit-btn.del { color: var(--danger); font-size: 1.2rem; }
-  .digit-btn.clear { color: var(--muted); font-size: 1rem; font-family: var(--font-body); font-weight:600; }
+  .digit-btn.clear { color: var(--muted); font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 
-  /* Quick-score grid: 2 cols, 4 rows */
+  /* Quick-score grid: 2 cols × 5 rows */
   .quick-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 1fr);
     gap: 0.4rem;
   }
   .quick-btn {
@@ -1219,7 +1219,7 @@
     border-radius: var(--radius-sm);
     color: var(--muted);
     font-family: var(--font-display);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     letter-spacing: 0.02em;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -1764,19 +1764,29 @@
       </div>
     </div>
 
-    <!-- Middle: Dart boxes -->
+    <!-- Middle: Dart boxes (dart mode) / Wurf box (sum mode) -->
     <div class="dart-boxes-col">
-      <div class="dart-box active" id="dbox-1">
-        <div class="dart-box-label">Dart 1</div>
-        <div class="dart-box-value" id="dbox-val-1">—</div>
+      <!-- Dart mode: 3 individual boxes -->
+      <div id="dartcol-dart">
+        <div class="dart-box active" id="dbox-1" style="margin-bottom:0.4rem">
+          <div class="dart-box-label">Dart 1</div>
+          <div class="dart-box-value" id="dbox-val-1">—</div>
+        </div>
+        <div class="dart-box" id="dbox-2" style="margin-bottom:0.4rem">
+          <div class="dart-box-label">Dart 2</div>
+          <div class="dart-box-value" id="dbox-val-2">—</div>
+        </div>
+        <div class="dart-box" id="dbox-3">
+          <div class="dart-box-label">Dart 3</div>
+          <div class="dart-box-value" id="dbox-val-3">—</div>
+        </div>
       </div>
-      <div class="dart-box" id="dbox-2">
-        <div class="dart-box-label">Dart 2</div>
-        <div class="dart-box-value" id="dbox-val-2">—</div>
-      </div>
-      <div class="dart-box" id="dbox-3">
-        <div class="dart-box-label">Dart 3</div>
-        <div class="dart-box-value" id="dbox-val-3">—</div>
+      <!-- Sum mode: single Wurf box -->
+      <div id="dartcol-sum" style="display:none;height:100%">
+        <div class="dart-box" id="dbox-sum" style="height:100%;justify-content:center">
+          <div class="dart-box-label">Wurf</div>
+          <div class="dart-box-value" id="dbox-sum-val">—</div>
+        </div>
       </div>
     </div>
 
@@ -2253,7 +2263,7 @@ function startGame() {
   document.getElementById('stat-best').textContent = '—';
 
   // Reset input mode UI
-  setInputMode(gameState.inputMode || 'dart');
+  setInputMode(gameConfig.inputMode || 'dart');
   // Mic init (if previously active, reopen)
   if (micActive) {
     try { speechRecognition && speechRecognition.abort(); } catch(e) {}
@@ -2769,12 +2779,20 @@ function getCheckoutHint(n) {
 function setInputMode(mode) {
   gameState.inputMode = mode;
   gameConfig.inputMode = mode;
-  // Toggle keypads (mode buttons no longer exist in-game)
+  // Toggle keypads
   const dartKp = document.getElementById('dart-keypad');
   const sumKp  = document.getElementById('sum-keypad');
   if (dartKp) dartKp.style.display = mode === 'dart' ? 'flex' : 'none';
   if (sumKp)  sumKp.classList.toggle('active', mode === 'sum');
-  if (mode === 'sum') sumClear();
+  // Toggle dart-col display
+  const colDart = document.getElementById('dartcol-dart');
+  const colSum  = document.getElementById('dartcol-sum');
+  if (colDart) colDart.style.display = mode === 'dart' ? 'block' : 'none';
+  if (colSum)  colSum.style.display  = mode === 'sum'  ? 'block' : 'none';
+  if (mode === 'sum') {
+    sumClear();
+    updateSumWurfBox(null);
+  }
 }
 
 // ════════════════════════════════════════════
@@ -2797,6 +2815,19 @@ function sumDel() {
 function sumClear() {
   gameState.sumInputStr = '';
   sumUpdateDisplay();
+}
+
+function updateSumWurfBox(scored) {
+  const box = document.getElementById('dbox-sum');
+  const val = document.getElementById('dbox-sum-val');
+  if (!box || !val) return;
+  if (scored === null) {
+    box.className = 'dart-box';
+    val.textContent = '—';
+  } else {
+    box.className = 'dart-box filled';
+    val.textContent = scored;
+  }
 }
 
 function sumQuick(val) {
@@ -2966,48 +2997,54 @@ function endRoundSum(busted, actualScore, dartCount, won = false, skipSpeak = fa
     return;
   }
 
-  if (!skipSpeak) {
-    if (settings.speech && !busted) speakRound(actualScore, gs.remaining);
-    else if (settings.speech && busted) speak('Bust!');
-  }
-
-  // Multiplayer
-  if (gameConfig.playerMode !== 'solo') {
-    if (gs.currentTurn === 'human') {
-      gs.humanRemaining = gs.remaining;
-      updateDualScores();
-      gs.currentTurn = 'opponent';
-      gs.round++;
-      gs.dartInRound = 0;
-      gs.throwsThisRound = [];
-      updateRoundScores();
-      updateDarts();
-      updateStats();
-      switchToOpponent();
-      return;
+  // All turn-switching happens AFTER speech is fully done
+  function afterSpeak() {
+    if (gameConfig.playerMode !== 'solo') {
+      if (gs.currentTurn === 'human') {
+        gs.humanRemaining = gs.remaining;
+        updateDualScores();
+        gs.currentTurn = 'opponent';
+        gs.round++;
+        gs.dartInRound = 0;
+        gs.throwsThisRound = [];
+        updateRoundScores();
+        updateDarts();
+        updateStats();
+        switchToOpponent();
+      } else {
+        gs.opponentRemaining = gs.remaining;
+        updateDualScores();
+        gs.currentTurn = 'human';
+        gs.remaining = gs.humanRemaining;
+        gs.round++;
+        gs.dartInRound = 0;
+        gs.throwsThisRound = [];
+        updateScoreDisplay();
+        updateRoundScores();
+        updateDarts();
+        updateStats();
+        updateTurnIndicator();
+      }
     } else {
-      gs.opponentRemaining = gs.remaining;
-      updateDualScores();
-      gs.currentTurn = 'human';
-      gs.remaining = gs.humanRemaining;
       gs.round++;
       gs.dartInRound = 0;
       gs.throwsThisRound = [];
-      updateScoreDisplay();
       updateRoundScores();
       updateDarts();
       updateStats();
-      updateTurnIndicator();
-      return;
     }
   }
 
-  gs.round++;
-  gs.dartInRound = 0;
-  gs.throwsThisRound = [];
-  updateRoundScores();
-  updateDarts();
-  updateStats();
+  if (skipSpeak) {
+    // Speech already handled by confirmation modal — just advance
+    afterSpeak();
+  } else if (settings.speech && !busted) {
+    speakRound(actualScore, gs.remaining, afterSpeak);
+  } else if (settings.speech && busted) {
+    speak('Bust!', afterSpeak);
+  } else {
+    afterSpeak();
+  }
 }
 
 // ════════════════════════════════════════════
@@ -3210,13 +3247,13 @@ function parseMultiWordDarts(text) {
 }
 
 function parseSumSpeech(text) {
-  // Patterns:
-  // "60 Punkte" / "sechzig" → scored 60
-  // "Rest 120" / "120 Rest" / "hundertundzwanzig Rest" → rest = 120
+  // Cancel any ongoing speech output before processing input
+  window.speechSynthesis && window.speechSynthesis.cancel();
 
   text = text.replace(/[,;]/g,' ').trim();
+  const isRest = /rest|übrig/i.test(text);
 
-  // Check for "rest" keyword
+  // Check for "rest" keyword with number
   const restMatch = text.match(/(?:rest\s+(\d+)|(\d+)\s+rest|(\d+)\s+übrig|übrig\s+(\d+))/i);
   if (restMatch) {
     const val = parseInt(restMatch[1] || restMatch[2] || restMatch[3] || restMatch[4]);
@@ -3235,19 +3272,21 @@ function parseSumSpeech(text) {
     if (!isNaN(val)) {
       gameState.sumInputStr = val.toString();
       sumUpdateDisplay();
-      sumCommitScore();
+      if (isRest) sumCommitRest();
+      else sumCommitScore();
       return;
     }
   }
 
   // Spoken German number
-  const tokens = text.replace(/\s*punkte?\s*/i,'').replace(/\s*rest\s*/i,'').trim().split(/\s+/);
+  const cleanText = text.replace(/\s*punkte?\s*/i,'').replace(/\s*rest\s*/i,'').trim();
+  const tokens = cleanText.split(/\s+/);
   for (const tok of tokens) {
     const n = parseSpokenNumber(tok);
     if (n !== null) {
       gameState.sumInputStr = n.toString();
       sumUpdateDisplay();
-      if (/rest|übrig/i.test(text)) sumCommitRest();
+      if (isRest) sumCommitRest();
       else sumCommitScore();
       return;
     }
@@ -3579,22 +3618,11 @@ function switchToOpponent() {
   const gs = gameState;
   updateTurnIndicator();
   if (gameConfig.playerMode === 'cpu') {
-    // Wait for speech to finish before AI throws
-    function startAi() { setTimeout(() => runAiTurn(), 400); }
-    if (settings.speech && window.speechSynthesis && window.speechSynthesis.speaking) {
-      const checkDone = setInterval(() => {
-        if (!window.speechSynthesis.speaking) {
-          clearInterval(checkDone);
-          startAi();
-        }
-      }, 100);
-      // Fallback: max 4s wait
-      setTimeout(() => { clearInterval(checkDone); if (!gameState.winner) startAi(); }, 4000);
-    } else {
-      startAi();
-    }
+    // Speech is already finished when we get here (called from onDone callback)
+    // Just add a short pause so the transition feels natural
+    setTimeout(() => runAiTurn(), 600);
   } else {
-    // PvP: just switch display, human enters for player 2
+    // PvP: switch display, player 2 enters
     gs.remaining = gs.opponentRemaining;
     updateScoreDisplay();
     updateDarts();
