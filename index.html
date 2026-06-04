@@ -15,13 +15,80 @@
     --accent: #e8c84a;
     --accent2: #4a9fe8;
     --danger: #e84a4a;
-    --success: #4ae884;
+    --success: #2db86b;
     --text: #f0f2f8;
     --muted: #7a8099;
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'Inter', sans-serif;
     --radius: 12px;
     --radius-sm: 8px;
+    color-scheme: dark;
+  }
+
+  /* ── LIGHT MODE ── */
+  [data-theme="light"] {
+    /* Logo palette: dark navy #13192b, gold #e8c84a, warm white #f0ead6 */
+    --bg: #eef0f5;
+    --surface: #ffffff;
+    --surface2: #dde1ec;
+    --border: rgba(19,25,43,0.12);
+    --accent: #c9a520;          /* slightly deeper gold for contrast on light */
+    --accent2: #2b7fd4;
+    --danger: #d43030;
+    --success: #1e9e56;
+    --text: #13192b;            /* logo navy */
+    --muted: #5a6278;
+    color-scheme: light;
+  }
+
+  /* Light mode specific overrides */
+  [data-theme="light"] body {
+    background: var(--bg);
+  }
+  [data-theme="light"] #page-splash {
+    background: #13192b;        /* keep splash dark always */
+  }
+  [data-theme="light"] .start-header {
+    background: linear-gradient(180deg, rgba(232,200,74,0.08) 0%, transparent 100%);
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding-bottom: 0.5rem;
+  }
+  [data-theme="light"] .mode-card:hover,
+  [data-theme="light"] .mode-card:active {
+    background: #f4f6fb;
+  }
+  [data-theme="light"] .toggle-slider {
+    background: #c8ccd9;
+    border-color: rgba(19,25,43,0.2);
+  }
+  [data-theme="light"] .toggle-slider::before {
+    background: #8a91a8;
+  }
+  [data-theme="light"] .game-header {
+    background: #ffffff;
+    border-bottom-color: rgba(19,25,43,0.1);
+  }
+  [data-theme="light"] .num-btn:active,
+  [data-theme="light"] .digit-btn:active,
+  [data-theme="light"] .quick-btn:active {
+    background: #dde1ec;
+  }
+  [data-theme="light"] .bust-overlay {
+    background: rgba(212,48,48,0.1);
+  }
+  [data-theme="light"] .modal-card {
+    background: #ffffff;
+    border-color: rgba(19,25,43,0.15);
+  }
+  [data-theme="light"] .confirm-card {
+    background: #ffffff;
+    border-color: rgba(19,25,43,0.15);
+  }
+  [data-theme="light"] .history-entry {
+    background: #ffffff;
+  }
+  [data-theme="light"] input[type=range].vol-slider {
+    background: #c8ccd9;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1656,6 +1723,22 @@
     <div class="settings-card">
       <div class="settings-row">
         <div>
+          <div class="settings-row-label">Design</div>
+          <div class="settings-row-sub">Hell oder dunkel</div>
+        </div>
+        <div style="display:flex;gap:0.35rem">
+          <button id="theme-dark-btn" onclick="setTheme('dark')"
+            style="padding:0.3rem 0.65rem;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:rgba(232,200,74,0.12);color:var(--accent);font-family:var(--font-body);font-size:0.72rem;font-weight:600;cursor:pointer;letter-spacing:0.06em">
+            🌙 DARK
+          </button>
+          <button id="theme-light-btn" onclick="setTheme('light')"
+            style="padding:0.3rem 0.65rem;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:0.72rem;font-weight:600;cursor:pointer;letter-spacing:0.06em">
+            ☀️ LIGHT
+          </button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div>
           <div class="settings-row-label">Sprachausgabe</div>
           <div class="settings-row-sub">Punkte & Restbetrag ansagen</div>
         </div>
@@ -2216,6 +2299,7 @@ function loadPersisted() {
     if (s.speech !== undefined) settings.speech = s.speech;
     if (s.haptic !== undefined) settings.haptic = s.haptic;
     if (s.volume !== undefined) settings.volume = s.volume;
+    if (s.theme)  settings.theme  = s.theme;
     const c = JSON.parse(localStorage.getItem('dartsConfig') || '{}');
     if (c.points) gameConfig.points = c.points;
     if (c.inRule) gameConfig.inRule = c.inRule;
@@ -2229,9 +2313,24 @@ function loadPersisted() {
 function persistSettings() {
   try {
     localStorage.setItem('dartsSettings', JSON.stringify({
-      speech: settings.speech, haptic: settings.haptic, volume: settings.volume
+      speech: settings.speech, haptic: settings.haptic, volume: settings.volume,
+      theme: settings.theme
     }));
   } catch(e) {}
+}
+
+function setTheme(theme) {
+  settings.theme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  const darkBtn  = document.getElementById('theme-dark-btn');
+  const lightBtn = document.getElementById('theme-light-btn');
+  if (darkBtn && lightBtn) {
+    const activeStyle  = 'padding:0.3rem 0.65rem;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:rgba(232,200,74,0.12);color:var(--accent);font-family:var(--font-body);font-size:0.72rem;font-weight:600;cursor:pointer;letter-spacing:0.06em';
+    const inactiveStyle = 'padding:0.3rem 0.65rem;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:0.72rem;font-weight:600;cursor:pointer;letter-spacing:0.06em';
+    darkBtn.style.cssText  = theme === 'dark'  ? activeStyle : inactiveStyle;
+    lightBtn.style.cssText = theme === 'light' ? activeStyle : inactiveStyle;
+  }
+  persistSettings();
 }
 function persistConfig() {
   try {
@@ -2241,7 +2340,7 @@ function persistConfig() {
     }));
   } catch(e) {}
 }
-const settings = { speech: true, haptic: true, volume: 0.8 };
+const settings = { speech: true, haptic: true, volume: 0.8, theme: 'dark' };
 
 const gameConfig = { points: 501, inRule: 'straight', outRule: 'double', limit: 0, playerMode: 'solo', difficulty: 'easy', player1Name: 'Spieler 1', player2Name: 'Spieler 2', inputMode: 'dart' };
 
@@ -4081,6 +4180,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 3000);
 
   loadPersisted();
+  setTheme(settings.theme || 'dark');
   // Sync settings UI
   const sp = document.getElementById('tgl-speech');
   if (sp) sp.checked = settings.speech;
