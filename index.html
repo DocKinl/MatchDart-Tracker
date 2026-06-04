@@ -1845,7 +1845,7 @@
       <button class="action-btn btn-miss" onclick="throwMiss()">
         MISS<small>Vorbei</small>
       </button>
-      <button class="action-btn btn-bull" onclick="throwBull()">
+      <button class="action-btn btn-bull" id="btn-bull" onclick="throwBull()">
         BULL<small>25 / 50</small>
       </button>
       <button class="action-btn btn-undo" onclick="undoLast()">
@@ -2286,6 +2286,13 @@ function setModifier(mod) {
   ['single','double','triple'].forEach(m => {
     document.getElementById('mod-' + m).classList.toggle('active', m === mod);
   });
+  // Bull is impossible with triple — grey it out
+  const bullBtn = document.getElementById('btn-bull');
+  if (bullBtn) {
+    bullBtn.disabled = mod === 'triple';
+    bullBtn.style.opacity = mod === 'triple' ? '0.35' : '';
+    bullBtn.style.cursor  = mod === 'triple' ? 'not-allowed' : '';
+  }
   updateInputDisplay();
 }
 
@@ -2309,6 +2316,7 @@ function throwMiss() {
 function throwBull() {
   haptic(8);
   if (gameState.dartInRound >= 3) return;
+  if (gameState.modifier === 'triple') return; // Triple Bull does not exist
 
   const mod = gameState.modifier;
   let scored;
@@ -3494,11 +3502,11 @@ function applyDartRound(d) {
     setTimeout(() => showWin(winner), 800);
     return;
   }
-  // Speak score + rest AFTER confirmation
+  // Speak total + rest AFTER confirmation (darts were already announced in modal)
   if (d.busted) {
     speak('Bust', () => endRound(d.busted, d.won, true));
   } else {
-    speak(d.actualScore + ' Punkte, Rest ' + d.newRemaining, () => endRound(d.busted, d.won, true));
+    speak('Gesamt ' + d.actualScore + ', Rest ' + d.newRemaining, () => endRound(d.busted, d.won, true));
   }
 }
 
