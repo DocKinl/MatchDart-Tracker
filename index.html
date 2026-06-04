@@ -183,7 +183,6 @@
     padding: 0.9rem 1.1rem;
     border-bottom: 1px solid var(--border);
     gap: 0.75rem;
-    overflow: hidden;
   }
   .settings-row:last-child { border-bottom: none; }
 
@@ -235,23 +234,23 @@
   .volume-row {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    flex: 1;
-    max-width: 100px;
+    gap: 0.5rem;
+    width: 100%;
     min-width: 0;
   }
-  .volume-icon { font-size: 0.9rem; color: var(--muted); }
+  .volume-icon { font-size: 0.9rem; color: var(--muted); flex-shrink: 0; }
   input[type=range].vol-slider {
     flex: 1;
+    min-width: 0;
     -webkit-appearance: none;
-    height: 3px;
+    height: 4px;
     border-radius: 999px;
     background: var(--surface2);
     outline: none;
   }
   input[type=range].vol-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 14px; height: 14px;
+    width: 16px; height: 16px;
     border-radius: 50%;
     background: var(--accent);
     cursor: pointer;
@@ -1537,10 +1536,8 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Lautstärke</div>
-        </div>
+      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:0.5rem">
+        <div class="settings-row-label">Lautstärke</div>
         <div class="volume-row">
           <span class="volume-icon">🔈</span>
           <input type="range" class="vol-slider" min="0" max="1" step="0.05" value="0.8"
@@ -3178,7 +3175,7 @@ function parseDartToken(token) {
   if (token === 'miss' || token === 'daneben' || token === 'vorbei') return { scored: 0, field: 0, mod: 'miss' };
 
   // Triple
-  let m = token.match(/^(?:t|triple|dreifach|3x|3×)(\d{1,2})$/);
+  let m = token.match(/^(?:t|triple|tripel|dreifach|3x|3×)(\d{1,2})$/);
   if (m) { const n = parseInt(m[1]); if (n >= 1 && n <= 20) return { scored: n*3, field: n, mod: 'triple' }; }
 
   // Double
@@ -3236,7 +3233,7 @@ function parseDartSpeech(text) {
 function parseMultiWordDarts(text) {
   const darts = [];
   // Patterns: (triple|dreifach|double|doppel|single|einfach)? <number>
-  const re = /(?:(triple|dreifach|3x|double|doppel|2x|single|einfach|1x|s|d|t)\s+)?(\d{1,2}|zwanzig|neunzehn|achtzehn|siebzehn|sechzehn|fünfzehn|vierzehn|dreizehn|zwölf|elf|zehn|neun|acht|sieben|sechs|fünf|vier|drei|zwei|eins|null|bull|miss|daneben)/gi;
+  const re = /(?:(triple|tripel|dreifach|3x|double|doppel|2x|single|einfach|1x|s|d|t)\s+)?(\d{1,2}|zwanzig|neunzehn|achtzehn|siebzehn|sechzehn|fünfzehn|vierzehn|dreizehn|zwölf|elf|zehn|neun|acht|sieben|sechs|fünf|vier|drei|zwei|eins|null|bull|miss|daneben)/gi;
   let m;
   while ((m = re.exec(text)) !== null && darts.length < 3) {
     const modStr = (m[1] || '').toLowerCase();
@@ -3246,7 +3243,7 @@ function parseMultiWordDarts(text) {
     const n = parseSpokenNumber(numStr);
     if (n === null || n < 1 || n > 20) continue;
     let mod = 'single';
-    if (/triple|dreifach|3x/.test(modStr)) mod = 'triple';
+    if (/triple|tripel|dreifach|3x/.test(modStr)) mod = 'triple';
     else if (/double|doppel|2x/.test(modStr)) mod = 'double';
     const multiplier = mod === 'triple' ? 3 : mod === 'double' ? 2 : 1;
     darts.push({ scored: n * multiplier, field: n, mod });
@@ -3348,7 +3345,7 @@ function showConfirmModal(data) {
       document.getElementById('cdb-pts-' + i).textContent = '';
     }
     document.getElementById('confirm-title').textContent =
-      'Punkte: ' + data.actualScore + '  –  Rest: ' + data.newRemaining;
+      'Gesamt: ' + data.actualScore + ' Pkt  |  Rest: ' + data.newRemaining;
   } else {
     document.getElementById('confirm-sum-val').textContent = data.actualScore;
     document.getElementById('confirm-sum-rest').textContent = data.newRemaining;
