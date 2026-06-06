@@ -1664,6 +1664,326 @@
     0%,100% { background: rgba(232,200,74,0.2); }
     50%      { background: rgba(232,200,74,0.9); }
   }
+
+  /* ── BOB'S 27 ── */
+  #page-bobs-setup, #page-bobs-game { background: var(--bg); }
+
+  .bobs-target-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem 0.85rem;
+    margin: 0.6rem 1rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .bobs-target-left { flex: 1; }
+  .bobs-target-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.15rem;
+  }
+  .bobs-target-field {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .bobs-target-value {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .bobs-score-block {
+    text-align: right;
+  }
+  .bobs-score-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.1rem;
+  }
+  .bobs-score-main {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: 0.03em;
+    transition: all 0.2s;
+  }
+  .bobs-score-main.positive { color: var(--success); }
+  .bobs-score-main.negative { color: var(--danger); }
+
+  /* Full-width round bar */
+  .bobs-round-bar {
+    margin: 0.5rem 1rem 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem 0.6rem;
+  }
+  .bobs-round-bar-inner {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.45rem;
+  }
+  .bobs-round-bar-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .bobs-round-bar-value {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  /* Progress pips row */
+  .bobs-progress-row {
+    display: flex;
+    gap: 0.2rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.1rem;
+  }
+  .bobs-progress-row::-webkit-scrollbar { display: none; }
+  .bobs-pip {
+    flex-shrink: 0;
+    width: 24px; height: 22px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem;
+    color: var(--muted);
+    font-family: var(--font-display);
+    letter-spacing: 0;
+    transition: all 0.2s;
+  }
+  .bobs-pip.current {
+    border-color: var(--accent);
+    background: rgba(232,200,74,0.12);
+    color: var(--accent);
+  }
+  .bobs-pip.hit    { background: var(--success); border-color: var(--success); color: #fff; }
+  .bobs-pip.miss   { background: var(--danger);  border-color: var(--danger);  color: #fff; }
+  .bobs-pip.done   { background: var(--surface2); color: var(--muted); border-color: var(--border); }
+
+  /* Dart input area */
+  .bobs-dart-row {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem 0;
+  }
+  .bobs-dart-box {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.4rem 0.5rem;
+    text-align: center;
+    transition: all 0.18s;
+    min-height: 64px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.15rem;
+  }
+  .bobs-dart-box.active { border-color: rgba(232,200,74,0.5); background: rgba(232,200,74,0.05); }
+  .bobs-dart-box.hit    { border-color: var(--success); background: rgba(74,232,132,0.08); }
+  .bobs-dart-box.miss   { border-color: var(--danger);  background: rgba(232,74,74,0.07); }
+  .bobs-dart-box-label  { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .bobs-dart-box-val    { font-family: var(--font-display); font-size: 1.6rem; line-height: 1; color: var(--muted); }
+  .bobs-dart-box.hit  .bobs-dart-box-val { color: var(--success); }
+  .bobs-dart-box.miss .bobs-dart-box-val { color: var(--danger); }
+
+  /* Input mode tabs */
+  .bobs-mode-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem 0;
+  }
+  .bobs-tab {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 0.45rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .bobs-tab.active { background: rgba(232,200,74,0.1); border-color: var(--accent); color: var(--accent); }
+
+  /* Simple input: 0/1/2/3 buttons */
+  .bobs-simple-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    flex: 1;
+  }
+  .bobs-count-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: all 0.12s;
+    gap: 0.2rem;
+    padding: 0.75rem 0.5rem;
+  }
+  .bobs-count-btn small {
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .bobs-count-btn:active { transform: scale(0.95); }
+  .bobs-count-btn.zero  { border-color: rgba(232,74,74,0.35); color: var(--danger); }
+  .bobs-count-btn.one   { border-color: var(--border); }
+  .bobs-count-btn.two   { border-color: rgba(74,232,132,0.35); color: var(--success); }
+  .bobs-count-btn.three { border-color: rgba(74,232,132,0.6); color: var(--success); background: rgba(74,232,132,0.06); }
+
+  /* Detailed input: Hit / Miss buttons */
+  .bobs-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    flex: 1;
+  }
+  .bobs-hit-btn {
+    background: rgba(74,232,132,0.1);
+    border: 1.5px solid rgba(74,232,132,0.4);
+    border-radius: var(--radius-sm);
+    color: var(--success);
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0.2rem;
+    transition: all 0.12s;
+    padding: 1rem;
+  }
+  .bobs-miss-btn {
+    background: rgba(232,74,74,0.1);
+    border: 1.5px solid rgba(232,74,74,0.35);
+    border-radius: var(--radius-sm);
+    color: var(--danger);
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0.2rem;
+    transition: all 0.12s;
+    padding: 1rem;
+  }
+  .bobs-hit-btn small, .bobs-miss-btn small {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .bobs-hit-btn:active  { transform: scale(0.96); }
+  .bobs-miss-btn:active { transform: scale(0.96); }
+
+  /* Bottom action bar */
+  .bobs-action-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0 1rem 1rem;
+  }
+  .bobs-undo-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .bobs-mic-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-size: 1.1rem;
+    padding: 0.7rem 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bobs-mic-btn.listening {
+    background: rgba(232,74,74,0.12);
+    border-color: var(--danger);
+    color: var(--danger);
+    animation: mic-pulse 1.2s ease-in-out infinite;
+  }
+  .bobs-mic-btn.muted { opacity: 0.45; }
+
+  /* Win/Loss overlay for Bob's */
+  .bobs-result-overlay {
+    position: fixed; inset: 0;
+    background: rgba(13,15,20,0.92);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 500; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s; padding: 1.5rem;
+    text-align: center;
+  }
+  .bobs-result-overlay.show { opacity: 1; pointer-events: all; }
+  .bobs-result-icon { font-size: 4rem; margin-bottom: 1rem; animation: win-bounce 0.6s ease; }
+  .bobs-result-title { font-family: var(--font-display); font-size: 3rem; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+  .bobs-result-title.won  { color: var(--success); }
+  .bobs-result-title.lost { color: var(--danger); }
+  .bobs-result-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .bobs-result-stats {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.1rem 1.25rem;
+    width: 100%; max-width: 300px; margin-bottom: 1.5rem;
+  }
+  .bobs-result-stat-row {
+    display: flex; justify-content: space-between;
+    padding: 0.4rem 0; border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .bobs-result-stat-row:last-child { border-bottom: none; }
+  .bobs-result-stat-label { color: var(--muted); }
+  .bobs-result-stat-val { font-family: var(--font-display); font-size: 1.1rem; color: var(--accent); }
+  .bobs-result-btn {
+    background: var(--accent); color: #0d0f14;
+    font-family: var(--font-display); font-size: 1.3rem;
+    letter-spacing: 0.08em; padding: 0.85rem 2rem;
+    border: none; border-radius: var(--radius); cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -1688,7 +2008,13 @@
         <div class="mode-name">X01</div>
         <div class="mode-desc">Klassisch — von 501/301/201/101 auf Null</div>
       </div>
-      <div class="mode-badge">Aktiv</div>
+    </div>
+    <div class="mode-card" onclick="selectMode('bobs27')">
+      <div class="mode-icon" style="background:rgba(232,200,74,0.1)">🎓</div>
+      <div class="mode-info">
+        <div class="mode-name">Bob's 27</div>
+        <div class="mode-desc">Checkout-Übung vom Profi</div>
+      </div>
     </div>
     <div class="mode-card disabled">
       <div class="mode-icon" style="background:rgba(255,255,255,0.04)">🔢</div>
@@ -1711,14 +2037,6 @@
       <div class="mode-info">
         <div class="mode-name">Darts-Rechner</div>
         <div class="mode-desc">Übe das Rechnen beim Darts</div>
-      </div>
-      <div class="mode-badge soon">Bald</div>
-    </div>
-    <div class="mode-card disabled">
-      <div class="mode-icon" style="background:rgba(255,255,255,0.04)">🎓</div>
-      <div class="mode-info">
-        <div class="mode-name">Bob's 27</div>
-        <div class="mode-desc">Checkout-Übung vom Profi</div>
       </div>
       <div class="mode-badge soon">Bald</div>
     </div>
@@ -1780,7 +2098,7 @@
 <div id="page-setup" class="page">
   <div class="nav-bar">
     <button class="btn-back" onclick="showPage('start')">←</button>
-    <div class="nav-title">X01 EINRICHTEN</div>
+    <div class="nav-title" style="color:var(--accent)">X01 EINRICHTEN</div>
   </div>
   <div class="setup-content">
 
@@ -1901,6 +2219,192 @@
 
     <button class="start-game-btn" onclick="startGame()">SPIEL STARTEN →</button>
   </div>
+</div>
+
+<!-- ════════════════ BOB'S 27 SETUP ════════════════ -->
+<div id="page-bobs-setup" class="page">
+  <div class="nav-bar">
+    <button class="btn-back" onclick="showPage('start')">←</button>
+    <div class="nav-title" style="color:var(--accent)">BOB'S 27 EINRICHTEN</div>
+  </div>
+  <div class="setup-content">
+
+    <div class="option-group">
+      <div class="option-label">Startwert</div>
+      <div class="btn-group two-col" id="bobs-grp-start">
+        <button class="opt-btn two-col selected" data-val="27" onclick="bobsSelectOpt('start',27,this)">
+          27 PUNKTE
+          <small>Standard (klassisch)</small>
+        </button>
+        <button class="opt-btn two-col" data-val="0" onclick="bobsSelectOpt('start',0,this)">
+          0 PUNKTE
+          <small>Erschwerter Start</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="option-label">Reihenfolge der Felder</div>
+      <div class="btn-group two-col" id="bobs-grp-order">
+        <button class="opt-btn two-col selected" data-val="standard" onclick="bobsSelectOpt('order','standard',this)">
+          STANDARD
+          <small>D1 → D20 → Bull</small>
+        </button>
+        <button class="opt-btn two-col" data-val="random" onclick="bobsSelectOpt('order','random',this)">
+          ZUFÄLLIG
+          <small>Zufällige Reihenfolge</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="option-label">Bull am Ende</div>
+      <div class="btn-group two-col" id="bobs-grp-bull">
+        <button class="opt-btn two-col selected" data-val="yes" onclick="bobsSelectOpt('bull','yes',this)">
+          JA
+          <small>Runde 21: Bull (50 Pkt)</small>
+        </button>
+        <button class="opt-btn two-col" data-val="no" onclick="bobsSelectOpt('bull','no',this)">
+          NEIN
+          <small>Nur D1 – D20</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="option-label">Spiel verloren bei 0</div>
+      <div class="btn-group two-col" id="bobs-grp-bust">
+        <button class="opt-btn two-col selected" data-val="yes" onclick="bobsSelectOpt('bust','yes',this)">
+          JA
+          <small>Klassische Regel</small>
+        </button>
+        <button class="opt-btn two-col" data-val="no" onclick="bobsSelectOpt('bust','no',this)">
+          NEIN
+          <small>Weiterspielen im Minus</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <div class="option-label">Eingabemodus</div>
+      <div class="btn-group two-col" id="bobs-grp-input">
+        <button class="opt-btn two-col selected" data-val="simple" onclick="bobsSelectOpt('input','simple',this)">
+          EINFACH
+          <small>Anzahl Treffer (0–3)</small>
+        </button>
+        <button class="opt-btn two-col" data-val="detail" onclick="bobsSelectOpt('input','detail',this)">
+          DETAILLIERT
+          <small>Dart für Dart</small>
+        </button>
+      </div>
+    </div>
+
+    <button class="start-game-btn" style="background:var(--accent)" onclick="startBobs27()">SPIEL STARTEN →</button>
+  </div>
+</div>
+
+<!-- ════════════════ BOB'S 27 GAME ════════════════ -->
+<div id="page-bobs-game" class="page">
+  <div class="game-header">
+    <div class="game-mode-tag" style="color:var(--accent)">BOB'S 27</div>
+    <div class="game-rule-tag" id="bobs-rule-tag">D1 → D20 → Bull</div>
+    <button class="mic-btn muted" id="bobs-mic-btn" onclick="toggleBobsMic()" title="Spracheingabe">🎤</button>
+    <button class="btn-menu" onclick="confirmBobsQuit()">✕</button>
+  </div>
+
+  <!-- Speech status -->
+  <div class="speech-status" id="bobs-speech-status">
+    <div class="speech-dot idle" id="bobs-speech-dot"></div>
+    <span id="bobs-speech-transcript">Warte auf Sprache…</span>
+  </div>
+
+  <!-- Target + Score display -->
+  <!-- Score row: Zielfeld left, Punkte right, full width -->
+  <div class="bobs-target-display">
+    <div class="bobs-target-left">
+      <div class="bobs-target-label">Aktuelles Feld</div>
+      <div class="bobs-target-field" id="bobs-target-field">D1</div>
+      <div class="bobs-target-value" id="bobs-target-value">±2 Punkte pro Dart</div>
+    </div>
+    <div class="bobs-score-block">
+      <div class="bobs-score-label">PUNKTE</div>
+      <div class="bobs-score-main" id="bobs-score">27</div>
+    </div>
+  </div>
+
+  <!-- Round progress bar: full width -->
+  <div class="bobs-round-bar">
+    <div class="bobs-round-bar-inner">
+      <div class="bobs-round-bar-label">RUNDE</div>
+      <div class="bobs-round-bar-value" id="bobs-round-label">1 / 21</div>
+    </div>
+    <div class="bobs-progress-row" id="bobs-progress-row"></div>
+  </div>
+
+  <!-- Dart boxes (detail mode) -->
+  <div class="bobs-dart-row" id="bobs-dart-row">
+    <div class="bobs-dart-box active" id="bobs-dbox-1">
+      <div class="bobs-dart-box-label">Dart 1</div>
+      <div class="bobs-dart-box-val" id="bobs-dval-1">—</div>
+    </div>
+    <div class="bobs-dart-box" id="bobs-dbox-2">
+      <div class="bobs-dart-box-label">Dart 2</div>
+      <div class="bobs-dart-box-val" id="bobs-dval-2">—</div>
+    </div>
+    <div class="bobs-dart-box" id="bobs-dbox-3">
+      <div class="bobs-dart-box-label">Dart 3</div>
+      <div class="bobs-dart-box-val" id="bobs-dval-3">—</div>
+    </div>
+  </div>
+
+  <!-- Simple input -->
+  <div class="bobs-simple-grid" id="bobs-simple-grid">
+    <button class="bobs-count-btn zero"  onclick="bobsSimpleInput(0)">0<small>Miss</small></button>
+    <button class="bobs-count-btn one"   onclick="bobsSimpleInput(1)">1<small>Treffer</small></button>
+    <button class="bobs-count-btn two"   onclick="bobsSimpleInput(2)">2<small>Treffer</small></button>
+    <button class="bobs-count-btn three" onclick="bobsSimpleInput(3)">3<small>Treffer</small></button>
+  </div>
+
+  <!-- Detail input -->
+  <div class="bobs-detail-grid" id="bobs-detail-grid" style="display:none">
+    <button class="bobs-hit-btn" onclick="bobsDetailInput(true)">
+      ✓<small>Getroffen</small>
+    </button>
+    <button class="bobs-miss-btn" onclick="bobsDetailInput(false)">
+      ✗<small>Daneben</small>
+    </button>
+  </div>
+
+  <!-- Action bar -->
+  <div class="bobs-action-bar">
+    <button class="bobs-undo-btn" onclick="bobsUndo()">↩ Zurück</button>
+  </div>
+</div>
+
+<!-- BOB'S 27 RESULT OVERLAY -->
+<div class="bobs-result-overlay" id="bobs-result-overlay">
+  <div class="bobs-result-icon" id="bobs-result-icon">🎯</div>
+  <div class="bobs-result-title" id="bobs-result-title">GEWONNEN!</div>
+  <div class="bobs-result-sub" id="bobs-result-sub">Alle Runden abgeschlossen</div>
+  <div class="bobs-result-stats">
+    <div class="bobs-result-stat-row">
+      <span class="bobs-result-stat-label">Endpunktzahl</span>
+      <span class="bobs-result-stat-val" id="bobs-final-score">—</span>
+    </div>
+    <div class="bobs-result-stat-row">
+      <span class="bobs-result-stat-label">Treffer</span>
+      <span class="bobs-result-stat-val" id="bobs-final-hits">—</span>
+    </div>
+    <div class="bobs-result-stat-row">
+      <span class="bobs-result-stat-label">Double-Quote</span>
+      <span class="bobs-result-stat-val" id="bobs-final-dq">—</span>
+    </div>
+    <div class="bobs-result-stat-row">
+      <span class="bobs-result-stat-label">Beste Runde</span>
+      <span class="bobs-result-stat-val" id="bobs-final-best">—</span>
+    </div>
+  </div>
+  <button class="bobs-result-btn" onclick="bobsResultClose()">ZURÜCK ZUR STARTSEITE</button>
 </div>
 
 <!-- ════════════════ GAME PAGE ════════════════ -->
@@ -2393,6 +2897,7 @@ function showPage(id) {
 }
 
 function selectMode(mode) {
+  if (mode === 'bobs27') { showPage('bobs-setup'); return; }
   if (mode !== 'x01') return;
   showPage('setup');
 }
@@ -4172,6 +4677,431 @@ function doQuit() {
 }
 function cancelQuit() {
   document.getElementById('quit-modal').classList.remove('show');
+}
+
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — CONFIG & STATE
+// ════════════════════════════════════════════
+const bobsConfig = {
+  start: 27,
+  order: 'standard',
+  bull: 'yes',
+  bust: 'yes',
+  input: 'simple',
+};
+
+let bobsState = {
+  score: 27,
+  round: 0,        // 0-based index into sequence
+  sequence: [],    // array of {field, value} — e.g. {field:'D1', value:2}
+  dartInRound: 0,  // 0-2 (detail mode)
+  dartsThisRound: [], // [{hit:true/false}]
+  history: [],     // [{field, hits, delta, scoreBefore, scoreAfter}]
+  totalDarts: 0,
+  totalHits: 0,
+  bestRound: 0,
+  bobsMicActive: false,
+  bobsMicMuted: false,
+  inputMode: 'simple',
+};
+
+let bobsRecognition = null;
+let bobsMicActive = false;
+
+// Full sequence: D1–D20 then Bull
+function buildSequence(order, includeBull) {
+  const seq = [];
+  for (let i = 1; i <= 20; i++) {
+    seq.push({ field: 'D' + i, value: i * 2 });
+  }
+  if (includeBull) seq.push({ field: 'BULL', value: 50 });
+  if (order === 'random') {
+    for (let i = seq.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [seq[i], seq[j]] = [seq[j], seq[i]];
+    }
+  }
+  return seq;
+}
+
+function bobsSelectOpt(group, val, btn) {
+  const grp = document.getElementById('bobs-grp-' + group);
+  grp.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  bobsConfig[group] = val;
+}
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — START
+// ════════════════════════════════════════════
+function startBobs27() {
+  haptic(10);
+  bobsState = {
+    score: bobsConfig.start,
+    round: 0,
+    sequence: buildSequence(bobsConfig.order, bobsConfig.bull === 'yes'),
+    dartInRound: 0,
+    dartsThisRound: [],
+    history: [],
+    totalDarts: 0,
+    totalHits: 0,
+    bestRound: 0,
+    inputMode: bobsConfig.input,
+  };
+
+  setBobsInputMode(bobsConfig.input);
+  bobsBuildProgress();
+  bobsUpdateDisplay();
+  bobsSpeakRound();
+
+  // Reset mic
+  if (bobsMicActive) {
+    bobsMicActive = false;
+    try { bobsRecognition && bobsRecognition.abort(); } catch(e) {}
+  }
+  document.getElementById('bobs-mic-btn').className = 'mic-btn muted';
+  document.getElementById('bobs-speech-status').classList.remove('active');
+
+  document.getElementById('bobs-result-overlay').classList.remove('show');
+  showPage('bobs-game');
+}
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — DISPLAY
+// ════════════════════════════════════════════
+function bobsUpdateDisplay() {
+  const s = bobsState;
+  const round = s.sequence[s.round];
+  if (!round) return;
+
+  document.getElementById('bobs-target-field').textContent = round.field;
+  document.getElementById('bobs-target-value').textContent =
+    '±' + round.value + ' Punkte pro Dart';
+  document.getElementById('bobs-round-label').textContent =
+    (s.round + 1) + ' / ' + s.sequence.length;
+
+  const scoreEl = document.getElementById('bobs-score');
+  scoreEl.textContent = s.score;
+  scoreEl.className = 'bobs-score-main' +
+    (s.score > bobsConfig.start ? ' positive' : s.score < 0 ? ' negative' : '');
+
+  bobsUpdatePips();
+  bobsUpdateDartBoxes();
+}
+
+function bobsBuildProgress() {
+  const row = document.getElementById('bobs-progress-row');
+  row.innerHTML = '';
+  bobsState.sequence.forEach((r, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'bobs-pip' + (i === 0 ? ' current' : '');
+    pip.id = 'bobs-pip-' + i;
+    pip.textContent = r.field.replace('D','');
+    row.appendChild(pip);
+  });
+}
+
+function bobsUpdatePips() {
+  const s = bobsState;
+  s.sequence.forEach((_, i) => {
+    const pip = document.getElementById('bobs-pip-' + i);
+    if (!pip) return;
+    if (i < s.round) {
+      const h = s.history[i];
+      pip.className = 'bobs-pip ' + (h && h.hits > 0 ? 'hit' : 'miss');
+    } else if (i === s.round) {
+      pip.className = 'bobs-pip current';
+    } else {
+      pip.className = 'bobs-pip';
+    }
+  });
+}
+
+function bobsUpdateDartBoxes() {
+  const s = bobsState;
+  [1,2,3].forEach(i => {
+    const box = document.getElementById('bobs-dbox-' + i);
+    const val = document.getElementById('bobs-dval-' + i);
+    if (!box || !val) return;
+    const throw_ = s.dartsThisRound[i - 1];
+    if (throw_ === undefined) {
+      box.className = 'bobs-dart-box' + (i === s.dartInRound + 1 ? ' active' : '');
+      val.textContent = '—';
+    } else {
+      box.className = 'bobs-dart-box ' + (throw_.hit ? 'hit' : 'miss');
+      val.textContent = throw_.hit ? '✓' : '✗';
+    }
+  });
+  if (s.dartInRound === 0) {
+    const b = document.getElementById('bobs-dbox-1');
+    if (b) b.classList.add('active');
+  }
+}
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — INPUT MODES
+// ════════════════════════════════════════════
+function setBobsInputMode(mode) {
+  bobsState.inputMode = mode;
+  document.getElementById('bobs-simple-grid').style.display = mode === 'simple' ? 'grid' : 'none';
+  document.getElementById('bobs-detail-grid').style.display = mode === 'detail' ? 'grid' : 'none';
+  document.getElementById('bobs-dart-row').style.display   = mode === 'detail' ? 'flex' : 'none';
+}
+
+// Simple mode: player taps 0/1/2/3
+function bobsSimpleInput(hits) {
+  haptic(10);
+  const s = bobsState;
+  const round = s.sequence[s.round];
+  if (!round) return;
+
+  const delta = hits > 0 ? hits * round.value : -round.value;
+  const scoreBefore = s.score;
+  const newScore = s.score + delta;
+  const totalDartsThisRound = 3;
+
+  s.totalDarts += totalDartsThisRound;
+  s.totalHits += hits;
+  if (hits > 0 && delta > s.bestRound) s.bestRound = delta;
+
+  s.history.push({ field: round.field, hits, delta, scoreBefore, scoreAfter: newScore });
+  s.score = newScore;
+  s.round++;
+
+  bobsUpdateDisplay();
+  bobsAddHistoryEntry(round.field, hits, delta);
+  bobsCheckEnd();
+}
+
+// Detail mode: dart by dart
+function bobsDetailInput(hit) {
+  haptic(8);
+  const s = bobsState;
+  if (s.dartInRound >= 3) return;
+
+  s.dartsThisRound.push({ hit });
+  s.dartInRound++;
+  s.totalDarts++;
+  if (hit) s.totalHits++;
+
+  bobsUpdateDartBoxes();
+
+  if (s.dartInRound >= 3) {
+    // Round complete
+    const round = s.sequence[s.round];
+    const hits = s.dartsThisRound.filter(d => d.hit).length;
+    const delta = hits > 0 ? hits * round.value : -round.value;
+    const scoreBefore = s.score;
+    const newScore = s.score + delta;
+    if (hits > 0 && delta > s.bestRound) s.bestRound = delta;
+
+    s.history.push({ field: round.field, hits, delta, scoreBefore, scoreAfter: newScore });
+    s.score = newScore;
+    s.round++;
+    s.dartInRound = 0;
+    s.dartsThisRound = [];
+
+    setTimeout(() => {
+      bobsUpdateDisplay();
+      bobsAddHistoryEntry(round.field, hits, delta);
+      bobsCheckEnd();
+    }, 400);
+  }
+}
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — UNDO
+// ════════════════════════════════════════════
+function bobsUndo() {
+  haptic(12);
+  const s = bobsState;
+  if (s.inputMode === 'detail' && s.dartInRound > 0) {
+    const last = s.dartsThisRound.pop();
+    s.dartInRound--;
+    s.totalDarts--;
+    if (last && last.hit) s.totalHits--;
+    bobsUpdateDartBoxes();
+    return;
+  }
+  if (s.history.length === 0) return;
+  const last = s.history.pop();
+  s.score = last.scoreBefore;
+  s.round--;
+  s.totalDarts -= 3;
+  s.totalHits -= last.hits;
+  s.dartInRound = 0;
+  s.dartsThisRound = [];
+  bobsUpdateDisplay();
+  bobsRemoveLastHistoryEntry();
+  bobsSpeakRound();
+}
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — HISTORY (reuse X01 bar)
+// ════════════════════════════════════════════
+function bobsAddHistoryEntry(field, hits, delta) {
+  // Speak result then next round
+  const s = bobsState;
+  const sign = delta >= 0 ? '+' : '';
+  const color = delta >= 0 ? 'var(--success)' : 'var(--danger)';
+  const nextRound = s.sequence[s.round];
+
+  speak(
+    (delta >= 0 ? 'Plus ' : 'Minus ') + Math.abs(delta) +
+    '. Punkte: ' + s.score +
+    (nextRound ? '. Nächstes Feld: ' + nextRound.field.replace('D', 'Double ').replace('BULL','Bull') : ''),
+    () => {}
+  );
+}
+
+function bobsRemoveLastHistoryEntry() {}
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — SPEECH OUTPUT
+// ════════════════════════════════════════════
+function bobsSpeakRound() {
+  if (!settings.speech) return;
+  const s = bobsState;
+  const round = s.sequence[s.round];
+  if (!round) return;
+  const fieldSpoken = round.field === 'BULL'
+    ? 'Bull'
+    : 'Double ' + round.field.replace('D','');
+  speak('Runde ' + (s.round + 1) + '. Ziel: ' + fieldSpoken +
+        '. Aktueller Stand: ' + s.score + ' Punkte');
+}
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — END CHECK
+// ════════════════════════════════════════════
+function bobsCheckEnd() {
+  const s = bobsState;
+  // Bust out
+  if (bobsConfig.bust === 'yes' && s.score <= 0) {
+    setTimeout(() => bobsShowResult(false), 300);
+    return;
+  }
+  // All rounds done
+  if (s.round >= s.sequence.length) {
+    setTimeout(() => bobsShowResult(true), 300);
+    return;
+  }
+  // Next round announcement
+  setTimeout(() => bobsSpeakRound(), 600);
+}
+
+function bobsShowResult(won) {
+  const s = bobsState;
+  const dq = s.totalDarts > 0
+    ? Math.round((s.totalHits / s.totalDarts) * 1000) / 10 : 0;
+
+  document.getElementById('bobs-result-icon').textContent  = won ? '🎯' : '💀';
+  document.getElementById('bobs-result-title').textContent = won ? 'ABGESCHLOSSEN!' : 'AUSGESCHIEDEN!';
+  document.getElementById('bobs-result-title').className   = 'bobs-result-title ' + (won ? 'won' : 'lost');
+  document.getElementById('bobs-result-sub').textContent   = won
+    ? 'Alle Runden erfolgreich gespielt'
+    : 'Punktestand auf ' + s.score + ' gefallen';
+  document.getElementById('bobs-final-score').textContent = s.score;
+  document.getElementById('bobs-final-hits').textContent  = s.totalHits + ' / ' + s.totalDarts;
+  document.getElementById('bobs-final-dq').textContent    = dq.toFixed(1) + ' %';
+  document.getElementById('bobs-final-best').textContent  = s.bestRound > 0 ? '+' + s.bestRound : '—';
+
+  document.getElementById('bobs-result-overlay').classList.add('show');
+
+  if (settings.speech) {
+    speak(won
+      ? 'Herzlichen Glückwunsch! Alle Runden abgeschlossen. Endstand: ' + s.score + ' Punkte.'
+      : 'Ausgeschieden! Endstand: ' + s.score + ' Punkte. Double-Quote: ' + dq.toFixed(1) + ' Prozent.');
+  }
+}
+
+function bobsResultClose() {
+  document.getElementById('bobs-result-overlay').classList.remove('show');
+  if (bobsMicActive) {
+    bobsMicActive = false;
+    try { bobsRecognition && bobsRecognition.abort(); } catch(e) {}
+  }
+  showPage('start');
+}
+
+function confirmBobsQuit() {
+  document.getElementById('quit-modal').classList.add('show');
+  // Override doQuit to go back to start
+  window._quitTarget = 'start';
+}
+
+// ════════════════════════════════════════════
+//  BOB'S 27 — SPEECH INPUT
+// ════════════════════════════════════════════
+function toggleBobsMic() {
+  if (!bobsRecognition) initBobsSpeech();
+  if (!bobsRecognition) return;
+  bobsMicActive = !bobsMicActive;
+  const btn    = document.getElementById('bobs-mic-btn');
+  const status = document.getElementById('bobs-speech-status');
+  if (bobsMicActive) {
+    btn.classList.remove('muted'); btn.classList.add('listening');
+    status.classList.add('active');
+    try { bobsRecognition.start(); } catch(e) {}
+  } else {
+    btn.classList.remove('listening'); btn.classList.add('muted');
+    status.classList.remove('active');
+    try { bobsRecognition.abort(); } catch(e) {}
+  }
+}
+
+function initBobsSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  bobsRecognition = new SR();
+  bobsRecognition.lang = 'de-DE';
+  bobsRecognition.continuous = false;
+  bobsRecognition.interimResults = false;
+  bobsRecognition.maxAlternatives = 3;
+
+  bobsRecognition.onresult = (e) => {
+    const text = e.results[e.results.length - 1][0].transcript.trim().toLowerCase();
+    document.getElementById('bobs-speech-transcript').textContent = text;
+    parseBobsSpeech(text);
+  };
+  bobsRecognition.onerror = (e) => {
+    if (e.error !== 'no-speech' && e.error !== 'aborted')
+      document.getElementById('bobs-speech-transcript').textContent = 'Fehler: ' + e.error;
+    if (bobsMicActive) setTimeout(() => { try { bobsRecognition.start(); } catch(e){} }, 300);
+  };
+  bobsRecognition.onend = () => {
+    if (bobsMicActive) setTimeout(() => { try { bobsRecognition.start(); } catch(e){} }, 200);
+    else {
+      document.getElementById('bobs-speech-dot').classList.add('idle');
+    }
+  };
+  bobsRecognition.onstart = () => {
+    document.getElementById('bobs-speech-dot').classList.remove('idle');
+  };
+}
+
+function parseBobsSpeech(text) {
+  const s = bobsState;
+  // Simple mode commands: "null","eine","zwei","drei","0","1","2","3"
+  // or "miss","daneben" → 0
+  // or "treffer" → 1
+  if (s.inputMode === 'simple') {
+    const map = {
+      'null':0,'daneben':0,'miss':0,'keine':0,'kein':0,
+      'eins':1,'ein':1,'einen':1,'einen treffer':1,'treffer':1,'1':1,'one':1,
+      'zwei':2,'zwei treffer':2,'2':2,'two':2,
+      'drei':3,'drei treffer':3,'alle drei':3,'alle':3,'3':3,'three':3,
+    };
+    for (const [key, val] of Object.entries(map)) {
+      if (text.includes(key)) { bobsSimpleInput(val); return; }
+    }
+  } else {
+    // Detail mode: "treffer","ja","hit","getroffen" → hit; "daneben","nein","miss","vorbei" → miss
+    if (/treffer|ja|hit|getroffen|rein|drin/.test(text)) { bobsDetailInput(true); return; }
+    if (/daneben|nein|miss|vorbei|verfehlt/.test(text))  { bobsDetailInput(false); return; }
+  }
+  document.getElementById('bobs-speech-transcript').textContent = '❓ ' + text;
 }
 
 // Apply persisted state to UI on load
