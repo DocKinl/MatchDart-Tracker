@@ -6257,6 +6257,31 @@ function parseAtcSpeech(text) {
   document.getElementById('atc-speech-transcript').textContent = '❓ ' + text;
 }
 
+
+// ════════════════════════════════════════════
+//  WAKE LOCK — Bildschirm wach halten
+// ════════════════════════════════════════════
+let wakeLock = null;
+
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => {
+      // Re-acquire if page still visible
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+  } catch (e) {
+    // Wake Lock not granted — silently ignore
+  }
+}
+
+// Re-acquire when tab becomes visible again
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+
+
 // Apply persisted state to UI on load
 document.addEventListener('DOMContentLoaded', () => {
   // Splash: show for 3s then fade to start
@@ -6270,6 +6295,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadPersisted();
   setTheme(settings.theme || 'dark');
+  requestWakeLock();
+  requestWakeLock();
   // Sync settings UI
   const sp = document.getElementById('tgl-speech');
   if (sp) sp.checked = settings.speech;
