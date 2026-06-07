@@ -5642,6 +5642,14 @@ function atcSelectOpt(group, val, btn) {
 function startAtc() {
   haptic(10);
   const seq = buildAtcSequence();
+  // Read player names if set
+  const p1Name = document.getElementById('input-p1-name') ? 
+    (document.getElementById('input-p1-name').value.trim() || 'Spieler 1') : 'Spieler 1';
+  const p2Name = document.getElementById('input-p2-name') ?
+    (document.getElementById('input-p2-name').value.trim() || 'Spieler 2') : 'Spieler 2';
+  atcConfig._p1Name = p1Name;
+  atcConfig._p2Name = p2Name;
+
   atcState = {
     sequence: seq,
     current: 0,
@@ -5659,6 +5667,14 @@ function startAtc() {
     opponentDarts: 0,
     opponentFieldDarts: [],
     opponentDone: false,
+    // PvP swap state
+    _playingAs: 'p1',
+    _humanCurrent: 0,
+    _humanDartsField: 0,
+    _humanTotalDarts: 0,
+    _humanTotalHits: 0,
+    _humanHistory: [],
+    _oppDartsThisField: 0,
   };
 
   // UI setup
@@ -5927,8 +5943,9 @@ function atcEndRound() {
   s.dartInRound = 0;
   atcUpdateDartBoxes();
 
-  if (s.playerMode === 'pvp') {
-    // PvP: switch to player 2
+  if (s.playerMode === 'cpu') {
+    setTimeout(() => atcRunCpu(), 600);
+  } else if (s.playerMode === 'pvp') {
     atcSwitchPvP();
   }
 }
@@ -5973,9 +5990,10 @@ function atcAdvanceField(extraSkip = 0) {
     s.dartInRound = 0;
     s.dartsThisRound = [];
     atcUpdateDartBoxes();
-    // CPU turn after human's round is fully done
     if (s.playerMode === 'cpu') {
       setTimeout(() => atcRunCpu(), 800);
+    } else if (s.playerMode === 'pvp') {
+      atcSwitchPvP();
     }
   }
   // else: player still has darts — just update display, wait for next input
@@ -6061,10 +6079,44 @@ function atcRunCpu() {
 //  ATC — PVP SWITCH
 // ════════════════════════════════════════════
 function atcSwitchPvP() {
-  // Simple swap: opponent fields tracked separately
-  // In PvP we track both independently
-  // For simplicity: one device, take turns per round
-  speak('Spieler 2 ist dran');
+  const s = atcState;
+  // Swap: human ↔ opponent
+  // Store human's progress, restore opponent's
+  const humanCurrent      = s.current;
+  const humanDartsField   = s.dartsThisField;
+  const humanTotalDarts   = s.totalDarts;
+  const humanTotalHits    = s.totalHits;
+  const humanHistory      = s.history;
+
+  s.current           = s.opponentCurrent;
+  s.dartsThisField    = s._oppDartsThisField || 0;
+  s.dartInRound       = 0;
+  s.dartsThisRound    = [];
+
+  // Save human state
+  s._humanCurrent         = humanCurrent;
+  s._humanDartsField      = humanDartsField;
+  s._humanTotalDarts      = humanTotalDarts;
+  s._humanTotalHits       = humanTotalHits;
+  s._humanHistory         = humanHistory;
+  s._playingAs            = s._playingAs === 'p2' ? 'p1' : 'p2';
+
+  // Update opponent tracking to current swap
+  s.opponentCurrent   = humanCurrent;
+  s._oppDartsThisField = humanDartsField;
+
+  // Update header
+  const isP2 = s._playingAs === 'p2';
+  const p1Name = atcConfig._p1Name || 'Spieler 1';
+  const p2Name = atcConfig._p2Name || 'Spieler 2';
+  document.getElementById('atc-rule-tag').textContent =
+    (isP2 ? p2Name : p1Name) + ' ist dran';
+
+  // Update display
+  atcUpdateDisplay();
+  atcUpdateStats();
+  speak((isP2 ? p2Name : p1Name) + ' ist dran, Ziel: ' +
+    (s.sequence[s.current] === 'Bull' ? 'Bull' : s.sequence[s.current]));
 }
 
 // ════════════════════════════════════════════
