@@ -6259,26 +6259,50 @@ function parseAtcSpeech(text) {
 
 
 // ════════════════════════════════════════════
-//  WAKE LOCK — Bildschirm wach halten
+//  WAKE LOCK — Bildschirm bleibt an
+//  Strategie 1: Wake Lock API (Chrome/Android)
+//  Strategie 2: Audio NoSleep (iOS Safari)
 // ════════════════════════════════════════════
 let wakeLock = null;
+let noSleepEnabled = false;
+let noSleepTimer = null;
+const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
 async function requestWakeLock() {
-  if (!('wakeLock' in navigator)) return;
-  try {
-    wakeLock = await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release', () => {
-      // Re-acquire if page still visible
-      if (document.visibilityState === 'visible') requestWakeLock();
-    });
-  } catch (e) {
-    // Wake Lock not granted — silently ignore
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+        if (document.visibilityState === 'visible') requestWakeLock();
+      });
+      return;
+    } catch(e) {}
   }
+  startNoSleepAudio();
 }
 
-// Re-acquire when tab becomes visible again
+function startNoSleepAudio() {
+  if (noSleepEnabled) return;
+  noSleepEnabled = true;
+  function playNoop() {
+    if (!noSleepEnabled) return;
+    const a = new Audio(SILENT_WAV);
+    a.volume = 0.01;
+    a.play().catch(() => {});
+    noSleepTimer = setTimeout(playNoop, 25000);
+  }
+  playNoop();
+}
+
+function stopNoSleepAudio() {
+  noSleepEnabled = false;
+  if (noSleepTimer) { clearTimeout(noSleepTimer); noSleepTimer = null; }
+}
+
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') requestWakeLock();
+  else stopNoSleepAudio();
 });
 
 
@@ -6295,8 +6319,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadPersisted();
   setTheme(settings.theme || 'dark');
-  requestWakeLock();
-  requestWakeLock();
+  // Wake Lock API (Android/Chrome) — works without gesture
+  if ('wakeLock' in navigator) requestWakeLock();
+  // iOS: NoSleep audio needs user gesture — trigger on first tap
+  function onFirstTouch() {
+    if (!noSleepEnabled && !wakeLock) startNoSleepAudio();
+    document.removeEventListener('touchstart', onFirstTouch);
+    document.removeEventListener('click', onFirstTouch);
+  }
+  document.addEventListener('touchstart', onFirstTouch, { once: true });
+  document.addEventListener('click', onFirstTouch, { once: true });
   // Sync settings UI
   const sp = document.getElementById('tgl-speech');
   if (sp) sp.checked = settings.speech;
