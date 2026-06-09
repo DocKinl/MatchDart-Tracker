@@ -4268,7 +4268,7 @@ function initSpeech() {
   speechRecognition.lang = 'de-DE';
   speechRecognition.continuous = false;
   speechRecognition.interimResults = true;
-  speechRecognition.maxAlternatives = 3;
+  speechRecognition.maxAlternatives = 1;
 
   speechRecognition.onstart = () => {
     const dot = document.getElementById('speech-dot');
@@ -4284,8 +4284,16 @@ function initSpeech() {
       if (e.results[i].isFinal) final += t;
       else interim += t;
     }
-    document.getElementById('speech-transcript').textContent = (final || interim).trim();
-    if (final) processSpeechInput(final.trim().toLowerCase());
+    const text = (final || interim).trim();
+    document.getElementById('speech-transcript').textContent = text;
+    if (final) {
+      processSpeechInput(final.trim().toLowerCase());
+    } else if (interim) {
+      // Act on interim if it looks like a complete command (no trailing partial word)
+      // This fires ~300-500ms faster than isFinal
+      const t = interim.trim().toLowerCase();
+      if (looksComplete(t)) processSpeechInput(t);
+    }
   };
 
   speechRecognition.onerror = (e) => {
@@ -4298,7 +4306,7 @@ function initSpeech() {
 
   speechRecognition.onend = () => {
     if (micActive && !gameState.micMuted) {
-      setTimeout(() => restartSpeech(), 300);
+      setTimeout(() => restartSpeech(), 150);
     } else {
       const dot = document.getElementById('speech-dot');
       if (dot) dot.classList.add('idle');
@@ -4765,6 +4773,38 @@ function handleConfirmSpeech(text) {
   if (/^(ja|yes|jo|genau|stimmt|richtig|okay|ok|bestätigen?)/.test(t)) { confirmYes(); return true; }
   if (/korrigier|falsch|nein|no|änder|fix/.test(t)) { confirmFix(); return true; }
   return false;
+}
+
+// ════════════════════════════════════════════
+//  SPEECH HELPERS
+// ════════════════════════════════════════════
+
+/**
+ * Returns true if an interim speech result looks like a complete command.
+ * This allows us to act ~300-500ms before isFinal fires.
+ * Heuristic: short (≤4 tokens), ends with a "complete" word, no trailing
+ * partial words (which tend to be very short).
+ */
+function looksComplete(text) {
+  if (!text) return false;
+  const tokens = text.trim().split(/\s+/);
+  // Very short commands are almost always complete
+  if (tokens.length === 1) return true;
+  // Known complete patterns for all modes
+  const completePatterns = [
+    /^\d+$/, // bare number "60"
+    /^\d+\s*(punkte?|rest|übrig)$/i,
+    /^(rest|übrig)\s*\d+$/i,
+    /^(treffer|ja|nein|daneben|miss|vorbei|bust|bull|alle|drin|rein)$/i,
+    /^(triple|tripel|dreifach|double|doppel|single|einfach)\s+\d+$/i,
+    /^[tds]\d+$/i,
+    /^\d+\s+(getroffen|treffer|punkte?)$/i,
+    /^(null|eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf)$/i,
+    /^(dreizehn|vierzehn|fünfzehn|sechzehn|siebzehn|achtzehn|neunzehn|zwanzig)$/i,
+    /^(ja|nein|korrigieren|zurück)$/i,
+    /^dart\s+[123]$/i,
+  ];
+  return completePatterns.some(p => p.test(text.trim()));
 }
 
 // ════════════════════════════════════════════
@@ -5528,21 +5568,30 @@ function initBobsSpeech() {
   bobsRecognition = new SR();
   bobsRecognition.lang = 'de-DE';
   bobsRecognition.continuous = false;
-  bobsRecognition.interimResults = false;
-  bobsRecognition.maxAlternatives = 3;
+  bobsRecognition.interimResults = true;
+  bobsRecognition.maxAlternatives = 1;
 
   bobsRecognition.onresult = (e) => {
-    const text = e.results[e.results.length - 1][0].transcript.trim().toLowerCase();
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const text = (final || interim).trim().toLowerCase();
     document.getElementById('bobs-speech-transcript').textContent = text;
-    parseBobsSpeech(text);
+    if (final) {
+      parseBobsSpeech(final.trim().toLowerCase());
+    } else if (interim && looksComplete(interim.trim().toLowerCase())) {
+      parseBobsSpeech(interim.trim().toLowerCase());
+    }
   };
   bobsRecognition.onerror = (e) => {
     if (e.error !== 'no-speech' && e.error !== 'aborted')
       document.getElementById('bobs-speech-transcript').textContent = 'Fehler: ' + e.error;
-    if (bobsMicActive) setTimeout(() => { try { bobsRecognition.start(); } catch(e){} }, 300);
+    if (bobsMicActive) setTimeout(() => { try { bobsRecognition.start(); } catch(e){} }, 150);
   };
   bobsRecognition.onend = () => {
-    if (bobsMicActive) setTimeout(() => { try { bobsRecognition.start(); } catch(e){} }, 200);
+    if (bobsMicActive) setTimeout(() => { try { bobsRecognition.start(); } catch(e){} }, 100);
     else {
       document.getElementById('bobs-speech-dot').classList.add('idle');
     }
@@ -6211,19 +6260,28 @@ function initAtcSpeech() {
   atcRecognition = new SR();
   atcRecognition.lang = 'de-DE';
   atcRecognition.continuous = false;
-  atcRecognition.interimResults = false;
-  atcRecognition.maxAlternatives = 3;
+  atcRecognition.interimResults = true;
+  atcRecognition.maxAlternatives = 1;
 
   atcRecognition.onresult = (e) => {
-    const text = e.results[e.results.length-1][0].transcript.trim().toLowerCase();
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const text = (final || interim).trim().toLowerCase();
     document.getElementById('atc-speech-transcript').textContent = text;
-    parseAtcSpeech(text);
+    if (final) {
+      parseAtcSpeech(final.trim().toLowerCase());
+    } else if (interim && looksComplete(interim.trim().toLowerCase())) {
+      parseAtcSpeech(interim.trim().toLowerCase());
+    }
   };
   atcRecognition.onerror = (e) => {
-    if (atcMicActive) setTimeout(() => { try { atcRecognition.start(); } catch(e){} }, 300);
+    if (atcMicActive) setTimeout(() => { try { atcRecognition.start(); } catch(e){} }, 150);
   };
   atcRecognition.onend = () => {
-    if (atcMicActive) setTimeout(() => { try { atcRecognition.start(); } catch(e){} }, 200);
+    if (atcMicActive) setTimeout(() => { try { atcRecognition.start(); } catch(e){} }, 100);
   };
 }
 
