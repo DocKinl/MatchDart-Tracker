@@ -4274,8 +4274,7 @@ function initSpeech() {
     const dot = document.getElementById('speech-dot');
     if (dot) { dot.classList.remove('idle'); }
     document.getElementById('speech-transcript').textContent = 'Höre zu…';
-    _speechHandled = false;
-    _lastInterim = '';
+    resetSpeechSession();
   };
 
   speechRecognition.onresult = (e) => {
@@ -4290,9 +4289,8 @@ function initSpeech() {
     document.getElementById('speech-transcript').textContent = text;
     if (final) {
       cancelPauseTimer();
-      processSpeechInput(final.trim().toLowerCase());
+      speechProcess(final.trim().toLowerCase(), processSpeechInput);
     } else if (interim) {
-      // Schedule processing after a short pause — avoids firing mid-phrase
       scheduleFromInterim(interim.trim().toLowerCase(), processSpeechInput);
     }
   };
@@ -4787,29 +4785,37 @@ function handleConfirmSpeech(text) {
  * within PAUSE_MS, we treat the last interim as the final input.
  * This avoids firing too early (e.g. "dreifach" before "8" is spoken).
  */
-const PAUSE_MS = 600; // ms of silence before treating interim as final
+// ─── Speech dedup: one result per recognition session ───────────────────────
+// _sessionDone is set to true as soon as we process any result (interim or final)
+// It resets to false on the next onstart — guaranteeing exactly-once execution.
+let _sessionDone = false;
+const PAUSE_MS = 600;
 let _pauseTimer = null;
-let _lastInterim = '';
-let _speechHandled = false; // guard: prevent double-processing
+
+function speechProcess(text, handler) {
+  if (_sessionDone) return;   // already handled this session
+  _sessionDone = true;
+  cancelPauseTimer();
+  handler(text);
+}
 
 function scheduleFromInterim(text, handler) {
-  _lastInterim = text;
-  _speechHandled = false;
+  if (_sessionDone) return;
   if (_pauseTimer) clearTimeout(_pauseTimer);
   _pauseTimer = setTimeout(() => {
     _pauseTimer = null;
-    if (_lastInterim && !_speechHandled) {
-      _speechHandled = true;
-      handler(_lastInterim);
-    }
-    _lastInterim = '';
+    speechProcess(text, handler);
   }, PAUSE_MS);
 }
 
 function cancelPauseTimer() {
   if (_pauseTimer) { clearTimeout(_pauseTimer); _pauseTimer = null; }
-  _lastInterim = '';
-  _speechHandled = true; // mark as handled so timer callback won't fire
+}
+
+function resetSpeechSession() {
+  _sessionDone = false;
+  _pauseTimer && clearTimeout(_pauseTimer);
+  _pauseTimer = null;
 }
 
 // ════════════════════════════════════════════
@@ -5586,7 +5592,7 @@ function initBobsSpeech() {
     document.getElementById('bobs-speech-transcript').textContent = text;
     if (final) {
       cancelPauseTimer();
-      parseBobsSpeech(final.trim().toLowerCase());
+      speechProcess(final.trim().toLowerCase(), parseBobsSpeech);
     } else if (interim) {
       scheduleFromInterim(interim.trim().toLowerCase(), parseBobsSpeech);
     }
@@ -5604,6 +5610,7 @@ function initBobsSpeech() {
   };
   bobsRecognition.onstart = () => {
     document.getElementById('bobs-speech-dot').classList.remove('idle');
+    resetSpeechSession();
   };
 }
 
@@ -6279,10 +6286,13 @@ function initAtcSpeech() {
     document.getElementById('atc-speech-transcript').textContent = text;
     if (final) {
       cancelPauseTimer();
-      parseAtcSpeech(final.trim().toLowerCase());
+      speechProcess(final.trim().toLowerCase(), parseAtcSpeech);
     } else if (interim) {
       scheduleFromInterim(interim.trim().toLowerCase(), parseAtcSpeech);
     }
+  };
+  atcRecognition.onstart = () => {
+    resetSpeechSession();
   };
   atcRecognition.onerror = (e) => {
     if (atcMicActive) setTimeout(() => { try { atcRecognition.start(); } catch(e){} }, 150);
