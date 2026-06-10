@@ -4287,12 +4287,11 @@ function initSpeech() {
     const text = (final || interim).trim();
     document.getElementById('speech-transcript').textContent = text;
     if (final) {
+      cancelPauseTimer();
       processSpeechInput(final.trim().toLowerCase());
     } else if (interim) {
-      // Act on interim if it looks like a complete command (no trailing partial word)
-      // This fires ~300-500ms faster than isFinal
-      const t = interim.trim().toLowerCase();
-      if (looksComplete(t)) processSpeechInput(t);
+      // Schedule processing after a short pause — avoids firing mid-phrase
+      scheduleFromInterim(interim.trim().toLowerCase(), processSpeechInput);
     }
   };
 
@@ -4780,31 +4779,29 @@ function handleConfirmSpeech(text) {
 // ════════════════════════════════════════════
 
 /**
- * Returns true if an interim speech result looks like a complete command.
- * This allows us to act ~300-500ms before isFinal fires.
- * Heuristic: short (≤4 tokens), ends with a "complete" word, no trailing
- * partial words (which tend to be very short).
+ * Pause-based completion detection.
+ * Instead of guessing if a command is complete, we wait for a short
+ * silence after the last interim result. If no new result arrives
+ * within PAUSE_MS, we treat the last interim as the final input.
+ * This avoids firing too early (e.g. "dreifach" before "8" is spoken).
  */
-function looksComplete(text) {
-  if (!text) return false;
-  const tokens = text.trim().split(/\s+/);
-  // Very short commands are almost always complete
-  if (tokens.length === 1) return true;
-  // Known complete patterns for all modes
-  const completePatterns = [
-    /^\d+$/, // bare number "60"
-    /^\d+\s*(punkte?|rest|übrig)$/i,
-    /^(rest|übrig)\s*\d+$/i,
-    /^(treffer|ja|nein|daneben|miss|vorbei|bust|bull|alle|drin|rein)$/i,
-    /^(triple|tripel|dreifach|double|doppel|single|einfach)\s+\d+$/i,
-    /^[tds]\d+$/i,
-    /^\d+\s+(getroffen|treffer|punkte?)$/i,
-    /^(null|eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf)$/i,
-    /^(dreizehn|vierzehn|fünfzehn|sechzehn|siebzehn|achtzehn|neunzehn|zwanzig)$/i,
-    /^(ja|nein|korrigieren|zurück)$/i,
-    /^dart\s+[123]$/i,
-  ];
-  return completePatterns.some(p => p.test(text.trim()));
+const PAUSE_MS = 600; // ms of silence before treating interim as final
+let _pauseTimer = null;
+let _lastInterim = '';
+
+function scheduleFromInterim(text, handler) {
+  _lastInterim = text;
+  if (_pauseTimer) clearTimeout(_pauseTimer);
+  _pauseTimer = setTimeout(() => {
+    _pauseTimer = null;
+    if (_lastInterim) handler(_lastInterim);
+    _lastInterim = '';
+  }, PAUSE_MS);
+}
+
+function cancelPauseTimer() {
+  if (_pauseTimer) { clearTimeout(_pauseTimer); _pauseTimer = null; }
+  _lastInterim = '';
 }
 
 // ════════════════════════════════════════════
@@ -5580,9 +5577,10 @@ function initBobsSpeech() {
     const text = (final || interim).trim().toLowerCase();
     document.getElementById('bobs-speech-transcript').textContent = text;
     if (final) {
+      cancelPauseTimer();
       parseBobsSpeech(final.trim().toLowerCase());
-    } else if (interim && looksComplete(interim.trim().toLowerCase())) {
-      parseBobsSpeech(interim.trim().toLowerCase());
+    } else if (interim) {
+      scheduleFromInterim(interim.trim().toLowerCase(), parseBobsSpeech);
     }
   };
   bobsRecognition.onerror = (e) => {
@@ -6272,9 +6270,10 @@ function initAtcSpeech() {
     const text = (final || interim).trim().toLowerCase();
     document.getElementById('atc-speech-transcript').textContent = text;
     if (final) {
+      cancelPauseTimer();
       parseAtcSpeech(final.trim().toLowerCase());
-    } else if (interim && looksComplete(interim.trim().toLowerCase())) {
-      parseAtcSpeech(interim.trim().toLowerCase());
+    } else if (interim) {
+      scheduleFromInterim(interim.trim().toLowerCase(), parseAtcSpeech);
     }
   };
   atcRecognition.onerror = (e) => {
