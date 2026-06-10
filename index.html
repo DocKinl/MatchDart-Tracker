@@ -4274,6 +4274,8 @@ function initSpeech() {
     const dot = document.getElementById('speech-dot');
     if (dot) { dot.classList.remove('idle'); }
     document.getElementById('speech-transcript').textContent = 'Höre zu…';
+    _speechHandled = false;
+    _lastInterim = '';
   };
 
   speechRecognition.onresult = (e) => {
@@ -4788,13 +4790,18 @@ function handleConfirmSpeech(text) {
 const PAUSE_MS = 600; // ms of silence before treating interim as final
 let _pauseTimer = null;
 let _lastInterim = '';
+let _speechHandled = false; // guard: prevent double-processing
 
 function scheduleFromInterim(text, handler) {
   _lastInterim = text;
+  _speechHandled = false;
   if (_pauseTimer) clearTimeout(_pauseTimer);
   _pauseTimer = setTimeout(() => {
     _pauseTimer = null;
-    if (_lastInterim) handler(_lastInterim);
+    if (_lastInterim && !_speechHandled) {
+      _speechHandled = true;
+      handler(_lastInterim);
+    }
     _lastInterim = '';
   }, PAUSE_MS);
 }
@@ -4802,6 +4809,7 @@ function scheduleFromInterim(text, handler) {
 function cancelPauseTimer() {
   if (_pauseTimer) { clearTimeout(_pauseTimer); _pauseTimer = null; }
   _lastInterim = '';
+  _speechHandled = true; // mark as handled so timer callback won't fire
 }
 
 // ════════════════════════════════════════════
